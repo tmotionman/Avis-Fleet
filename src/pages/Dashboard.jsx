@@ -40,7 +40,7 @@ const Dashboard = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="p-6 space-y-6"
+      className="p-3 md:p-6 space-y-4 md:space-y-6"
     >
       {/* Page Header */}
       <motion.div variants={itemVariants}>
@@ -49,7 +49,7 @@ const Dashboard = () => {
       </motion.div>
 
       {/* KPI Cards */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4">
         <KPICard
           icon={<FaCarSide />}
           label="Total Vehicles"
@@ -89,7 +89,7 @@ const Dashboard = () => {
       </motion.div>
 
       {/* Charts */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <FleetUtilizationChart />
         <VehicleStatusChart />
       </motion.div>
@@ -99,22 +99,22 @@ const Dashboard = () => {
       </motion.div>
 
       {/* Quick Stats */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase">Average Mileage</h3>
-          <p className="text-2xl font-bold text-avis-black mt-2">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+        <div className="bg-white p-4 md:p-6 rounded-lg md:rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-xs md:text-sm font-semibold text-gray-500 uppercase">Average Mileage</h3>
+          <p className="text-lg md:text-2xl font-bold text-avis-black mt-2">
             {(vehiclesData.reduce((sum, v) => sum + v.mileage, 0) / vehiclesData.length).toLocaleString('en-ZA', { maximumFractionDigits: 0 })} km
           </p>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase">Avg Fuel Consumption</h3>
-          <p className="text-2xl font-bold text-avis-black mt-2">
+        <div className="bg-white p-4 md:p-6 rounded-lg md:rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-xs md:text-sm font-semibold text-gray-500 uppercase">Avg Fuel Consumption</h3>
+          <p className="text-lg md:text-2xl font-bold text-avis-black mt-2">
             {(fuelData.reduce((sum, f) => sum + f.liters, 0) / fuelData.length).toFixed(1)} L
           </p>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase">Fleet Age</h3>
-          <p className="text-2xl font-bold text-avis-black mt-2">
+        <div className="bg-white p-4 md:p-6 rounded-lg md:rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-xs md:text-sm font-semibold text-gray-500 uppercase">Fleet Age</h3>
+          <p className="text-lg md:text-2xl font-bold text-avis-black mt-2">
             {Math.round(vehiclesData.reduce((sum, v) => sum + (2025 - v.year), 0) / vehiclesData.length)} years
           </p>
         </div>
