@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'
-import bgImage from '../../assets/bb9c668f-beb0-42e8-b6d9-be055222c9e9.jpg'
 
 const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('')
@@ -40,13 +39,31 @@ const Login = ({ onLogin }) => {
     }, 1000)
   }
 
+  const [bgLoaded, setBgLoaded] = useState(false)
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Flipped background image as absolute layer */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
-        style={{ backgroundImage: `url(${bgImage})`, transform: 'scaleX(-1)' }}
-      />
+      {/* Responsive picture element: AVIF -> WebP -> fallback JPG; uses a small blur until loaded */}
+      <picture className="absolute inset-0 z-0 w-full h-full">
+        <source
+          srcSet="/assets/bg-1600.avif 1600w, /assets/bg-800.avif 800w, /assets/bg-400.avif 400w"
+          type="image/avif"
+        />
+        <source
+          srcSet="/assets/bg-1600.webp 1600w, /assets/bg-800.webp 800w, /assets/bg-400.webp 400w"
+          type="image/webp"
+        />
+        <img
+          src="/assets/bg-1600.webp"
+          alt="Avis background"
+          loading="eager"
+          onLoad={() => setBgLoaded(true)}
+          style={{ transform: 'scaleX(-1)' }}
+          className={`absolute inset-0 z-0 w-full h-full object-cover transition-filter duration-700 ${
+            bgLoaded ? 'filter-none' : 'blur-2xl grayscale'
+          }`}
+        />
+      </picture>
   {/* Background gradient blobs */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-avis-red opacity-10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-avis-red opacity-5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
