@@ -1,0 +1,72 @@
+[
+  {
+    "id": "USR001",
+    "name": "Admin User",
+    "email": "admin@avisfleet.com",
+    "role": "Admin",
+    "region": "All",
+    "phone": "+27-11-123-4567",
+    "joinDate": "2024-01-15",
+    "status": "Active"
+  },
+  {
+    "id": "USR002",
+    "name": "John Smith",
+    "email": "john.smith@avisfleet.com",
+    "role": "Employee",
+    "region": "Johannesburg",
+    "phone": "+27-11-234-5678",
+    "joinDate": "2024-03-20",
+    "status": "Active"
+  },
+  {
+    "id": "USR003",
+    "name": "Sarah Johnson",
+    "email": "sarah.johnson@avisfleet.com",
+    "role": "Employee",
+    "region": "Cape Town",
+    "phone": "+27-21-345-6789",
+    "joinDate": "2024-05-10",
+    "status": "Active"
+  },
+  {
+    "id": "USR004",
+    "name": "Mike Davis",
+    "email": "mike.davis@avisfleet.com",
+    "role": "Manager",
+    "region": "Durban",
+    "phone": "+27-31-456-7890",
+    "joinDate": "2024-02-14",
+    "status": "Active"
+  },
+  {
+    "id": "USR005",
+    "name": "Emma Wilson",
+    "email": "emma.wilson@avisfleet.com",
+    "role": "Employee",
+    "region": "Johannesburg",
+    "phone": "+27-11-567-8901",
+    "joinDate": "2024-06-01",
+    "status": "Active"
+  },
+  {
+    "id": "USR006",
+    "name": "Robert Brown",
+    "email": "robert.brown@avisfleet.com",
+    "role": "Manager",
+    "region": "Cape Town",
+    "phone": "+27-21-678-9012",
+    "joinDate": "2024-04-25",
+    "status": "Active"
+  },
+  {
+    "id": "USR007",
+    "name": "Lisa Anderson",
+    "email": "lisa.anderson@avisfleet.com",
+    "role": "Employee",
+    "region": "Durban",
+    "phone": "+27-31-789-0123",
+    "joinDate": "2024-07-10",
+    "status": "Inactive"
+  }
+]

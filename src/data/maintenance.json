@@ -1,0 +1,90 @@
+[
+  {
+    "id": "MAINT001",
+    "vehicleId": "VEH001",
+    "vehicleNo": "GAU 215 GP",
+    "serviceType": "Oil Change",
+    "date": "2025-10-15",
+    "cost": 450,
+    "notes": "Regular oil change, filter replaced",
+    "technician": "John Mecha",
+    "status": "Completed"
+  },
+  {
+    "id": "MAINT002",
+    "vehicleId": "VEH002",
+    "vehicleNo": "GAU 216 GP",
+    "serviceType": "Tire Rotation",
+    "date": "2025-10-20",
+    "cost": 350,
+    "notes": "All tires rotated and balanced",
+    "technician": "David Smith",
+    "status": "Scheduled"
+  },
+  {
+    "id": "MAINT003",
+    "vehicleId": "VEH003",
+    "vehicleNo": "GAU 217 GP",
+    "serviceType": "Brake Inspection",
+    "date": "2025-10-10",
+    "cost": 550,
+    "notes": "Brake pads checked, rotors fine",
+    "technician": "Mike Johnson",
+    "status": "Completed"
+  },
+  {
+    "id": "MAINT004",
+    "vehicleId": "VEH005",
+    "vehicleNo": "GAU 219 GP",
+    "serviceType": "Engine Diagnostic",
+    "date": "2025-10-22",
+    "cost": 800,
+    "notes": "Full diagnostic scan performed",
+    "technician": "Alex Brown",
+    "status": "In Progress"
+  },
+  {
+    "id": "MAINT005",
+    "vehicleId": "VEH007",
+    "vehicleNo": "GAU 221 GP",
+    "serviceType": "Air Filter Replacement",
+    "date": "2025-10-08",
+    "cost": 200,
+    "notes": "Cabin and engine filters replaced",
+    "technician": "Chris Lee",
+    "status": "Completed"
+  },
+  {
+    "id": "MAINT006",
+    "vehicleId": "VEH004",
+    "vehicleNo": "GAU 218 GP",
+    "serviceType": "Battery Check",
+    "date": "2025-10-25",
+    "cost": 150,
+    "notes": "Battery voltage OK, terminals cleaned",
+    "technician": "Emma Wilson",
+    "status": "Scheduled"
+  },
+  {
+    "id": "MAINT007",
+    "vehicleId": "VEH001",
+    "vehicleNo": "GAU 215 GP",
+    "serviceType": "Coolant Flush",
+    "date": "2025-09-30",
+    "cost": 600,
+    "notes": "System flushed and refilled",
+    "technician": "John Mecha",
+    "status": "Completed"
+  },
+  {
+    "id": "MAINT008",
+    "vehicleId": "VEH008",
+    "vehicleNo": "GAU 222 GP",
+    "serviceType": "Transmission Service",
+    "date": "2025-11-05",
+    "cost": 1200,
+    "notes": "Fluid and filter change",
+    "technician": "Robert Chen",
+    "status": "Scheduled"
+  }
+]
