@@ -42,9 +42,9 @@ const Login = ({ onLogin }) => {
   const [bgLoaded, setBgLoaded] = useState(false)
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Responsive picture element: AVIF -> WebP -> fallback JPG; uses a small blur until loaded */}
-      <picture className="absolute inset-0 z-0 w-full h-full">
+    <div className="min-h-screen flex flex-col lg:flex lg:items-center lg:justify-center lg:p-4 lg:relative lg:overflow-hidden bg-white">
+      {/* Desktop: Full-screen background */}
+      <picture className="hidden lg:block absolute inset-0 z-0 w-full h-full">
         <source
           srcSet="/assets/bg-1600.avif 1600w, /assets/bg-800.avif 800w, /assets/bg-400.avif 400w"
           type="image/avif"
@@ -64,63 +64,91 @@ const Login = ({ onLogin }) => {
           }`}
         />
       </picture>
-  {/* Background gradient blobs */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-avis-red opacity-10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-avis-red opacity-5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
 
-  {/* Slight black tint overlay for better contrast */}
-  <div className="absolute inset-0 bg-black/40 z-10"></div>
+      {/* Desktop: Background gradient blobs and overlay */}
+      <div className="hidden lg:block absolute top-0 left-0 w-96 h-96 bg-avis-red opacity-10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+      <div className="hidden lg:block absolute bottom-0 right-0 w-96 h-96 bg-avis-red opacity-5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+      <div className="hidden lg:block absolute inset-0 bg-black/40 z-10"></div>
+
+      {/* Mobile: Background image as header */}
+      <picture className="lg:hidden w-full h-48 overflow-hidden relative z-0">
+        <source
+          srcSet="/assets/bg-1600.avif 1600w, /assets/bg-800.avif 800w, /assets/bg-400.avif 400w"
+          type="image/avif"
+        />
+        <source
+          srcSet="/assets/bg-1600.webp 1600w, /assets/bg-800.webp 800w, /assets/bg-400.webp 400w"
+          type="image/webp"
+        />
+        <img
+          src="/assets/bg-1600.webp"
+          alt="Avis background"
+          loading="eager"
+          onLoad={() => setBgLoaded(true)}
+          style={{ transform: 'scaleX(-1)' }}
+          className={`w-full h-full object-cover transition-filter duration-700 ${
+            bgLoaded ? 'filter-none' : 'blur-2xl grayscale'
+          }`}
+        />
+      </picture>
+
+      {/* Mobile: Branding overlay on image header */}
+      <div className="lg:hidden absolute top-1/4 left-0 right-0 z-20 flex items-center justify-center">
+        <h1 className="text-3xl font-bold text-white">
+          <span className="text-avis-red">AVIS</span>
+          <span className="text-white"> | Fleet</span>
+        </h1>
+      </div>
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-5xl relative z-20"
+        className="w-full max-w-5xl lg:relative lg:z-20 flex flex-col lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          {/* Left Side - Branding & Message */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="hidden lg:flex flex-col justify-center space-y-8"
-          >
-            <div>
-              <div className="h-12 mb-6 flex items-center">
-                <h1 className="text-3xl font-bold text-white">
-                  <span className="text-avis-red">AVIS</span>
-                  <span className="text-white"> | Fleet</span>
-                </h1>
-              </div>
-              <p className="text-xl text-gray-300 mb-8">
-                Efficiently track, maintain, and assign vehicles to your clients. Everything you need for seamless fleet management.
-              </p>
+        {/* Left Side - Branding & Message (Desktop only) */}
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="hidden lg:flex flex-col justify-center space-y-8"
+        >
+          <div>
+            <div className="h-12 mb-6 flex items-center">
+              <h1 className="text-3xl font-bold text-white">
+                <span className="text-avis-red">AVIS</span>
+                <span className="text-white"> | Fleet</span>
+              </h1>
             </div>
+            <p className="text-xl text-gray-300 mb-8">
+              Efficiently track, maintain, and assign vehicles to your clients. Everything you need for seamless fleet management.
+            </p>
+          </div>
 
-            {/* Feature highlights */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="w-3 h-3 rounded-full bg-avis-red"></div>
-                <p className="text-gray-300">Real-time vehicle tracking</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-3 h-3 rounded-full bg-avis-red"></div>
-                <p className="text-gray-300">Vehicle management</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-3 h-3 rounded-full bg-avis-red"></div>
-                <p className="text-gray-300">Client management</p>
-              </div>
+          {/* Feature highlights */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="w-3 h-3 rounded-full bg-avis-red"></div>
+              <p className="text-gray-300">Real-time vehicle tracking</p>
             </div>
-          </motion.div>
+            <div className="flex items-center gap-4">
+              <div className="w-3 h-3 rounded-full bg-avis-red"></div>
+              <p className="text-gray-300">Vehicle management</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-3 h-3 rounded-full bg-avis-red"></div>
+              <p className="text-gray-300">Client management</p>
+            </div>
+          </div>
+        </motion.div>
 
-          {/* Right Side - Login Form */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-8 border border-gray-200"
-          >
+        {/* Right Side - Login Form */}
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="w-full lg:max-w-md bg-white/95 lg:bg-white/95 backdrop-blur-md rounded-none lg:rounded-2xl shadow-lg lg:shadow-2xl p-6 lg:p-8 border-none lg:border lg:border-gray-200 z-30"
+        >
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-avis-black mb-2">Welcome Back</h2>
               <p className="text-gray-600">Sign in to your Avis Fleet account</p>
@@ -231,8 +259,7 @@ const Login = ({ onLogin }) => {
                 <p>Password: <span className="font-mono font-semibold">password123</span></p>
               </div>
             </div>
-          </motion.div>
-        </div>
+        </motion.div>
       </motion.div>
 
       {/* Sign Up Modal */}
