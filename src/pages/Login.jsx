@@ -1,6 +1,12 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'
+import bg1600Avif from '../../assets/bg-1600.avif'
+import bg800Avif from '../../assets/bg-800.avif'
+import bg400Avif from '../../assets/bg-400.avif'
+import bg1600Webp from '../../assets/bg-1600.webp'
+import bg800Webp from '../../assets/bg-800.webp'
+import bg400Webp from '../../assets/bg-400.webp'
 
 const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('')
@@ -46,15 +52,15 @@ const Login = ({ onLogin }) => {
       {/* Desktop: Full-screen background */}
       <picture className="hidden lg:block absolute inset-0 z-0 w-full h-full">
         <source
-          srcSet="/assets/bg-1600.avif 1600w, /assets/bg-800.avif 800w, /assets/bg-400.avif 400w"
+          srcSet={`${bg1600Avif} 1600w, ${bg800Avif} 800w, ${bg400Avif} 400w`}
           type="image/avif"
         />
         <source
-          srcSet="/assets/bg-1600.webp 1600w, /assets/bg-800.webp 800w, /assets/bg-400.webp 400w"
+          srcSet={`${bg1600Webp} 1600w, ${bg800Webp} 800w, ${bg400Webp} 400w`}
           type="image/webp"
         />
         <img
-          src="/assets/bg-1600.webp"
+          src={bg1600Webp}
           alt="Avis background"
           loading="eager"
           onLoad={() => setBgLoaded(true)}
@@ -73,15 +79,15 @@ const Login = ({ onLogin }) => {
       {/* Mobile: Background image as header */}
       <picture className="lg:hidden w-full h-48 overflow-hidden relative z-0">
         <source
-          srcSet="/assets/bg-1600.avif 1600w, /assets/bg-800.avif 800w, /assets/bg-400.avif 400w"
+          srcSet={`${bg1600Avif} 1600w, ${bg800Avif} 800w, ${bg400Avif} 400w`}
           type="image/avif"
         />
         <source
-          srcSet="/assets/bg-1600.webp 1600w, /assets/bg-800.webp 800w, /assets/bg-400.webp 400w"
+          srcSet={`${bg1600Webp} 1600w, ${bg800Webp} 800w, ${bg400Webp} 400w`}
           type="image/webp"
         />
         <img
-          src="/assets/bg-1600.webp"
+          src={bg1600Webp}
           alt="Avis background"
           loading="eager"
           onLoad={() => setBgLoaded(true)}

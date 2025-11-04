@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="/assets/image.png" />
   <link rel="apple-touch-icon" href="/assets/image.png" />
-    <!-- Preload the primary login background in AVIF (used by the login page) to improve first-paint -->
-    <link rel="preload" as="image" href="/assets/bg-1600.avif" type="image/avif">
+  <!-- Removed static preload: images are imported in the app so Vite will emit correct hashed assets and the browser will load them via the React tree. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <title>Avis Fleet Management System</title>
