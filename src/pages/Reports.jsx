@@ -165,27 +165,24 @@ const Reports = () => {
         <p className="text-gray-500 mt-1">Generate and export fleet management reports</p>
       </div>
 
-      {/* Report Type Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Report Type Selection - Tab Style */}
+      <div className="flex gap-4 border-b border-gray-200">
         {[
-          { id: 'fleet', label: 'Fleet Report', icon: '🚗' },
-          { id: 'clients', label: 'Clients Report', icon: '👥' },
+          { id: 'fleet', label: 'Fleet Report' },
+          { id: 'clients', label: 'Clients Report' },
         ].map(report => (
           <motion.button
             key={report.id}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
             onClick={() => setSelectedReport(report.id)}
-            className={`p-6 rounded-xl border-2 transition-all ${
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className={`px-6 py-3 font-medium text-sm transition-all duration-200 border-b-2 ${
               selectedReport === report.id
-                ? 'border-avis-red bg-red-50'
-                : 'border-gray-200 bg-white hover:border-avis-red'
+                ? 'text-avis-red border-avis-red'
+                : 'text-gray-600 border-transparent hover:text-gray-900'
             }`}
           >
-            <div className="text-3xl mb-2">{report.icon}</div>
-            <h3 className={`font-semibold ${selectedReport === report.id ? 'text-avis-red' : 'text-avis-black'}`}>
-              {report.label}
-            </h3>
+            {report.label}
           </motion.button>
         ))}
       </div>
