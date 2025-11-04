@@ -15,7 +15,8 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'Poppins', 'system-ui', 'sans-serif'],
+        // Make Satoshi the primary UI font, fall back to Inter/Poppins/system fonts
+        sans: ['Satoshi', 'Inter', 'Poppins', 'system-ui', 'sans-serif'],
       },
       animation: {
         fadeIn: 'fadeIn 0.3s ease-in-out',
