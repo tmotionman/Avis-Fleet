@@ -98,13 +98,7 @@ const Login = ({ onLogin }) => {
         />
       </picture>
 
-      {/* Mobile: Branding overlay on image header */}
-      <div className="lg:hidden absolute top-1/4 left-0 right-0 z-20 flex items-center justify-center">
-        <h1 className="text-3xl font-bold text-white">
-          <span className="text-avis-red">AVIS</span>
-          <span className="text-white"> | Fleet</span>
-        </h1>
-      </div>
+      {/* Mobile branding overlay removed per request (only visible on desktop) */}
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
