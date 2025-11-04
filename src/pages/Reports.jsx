@@ -8,9 +8,15 @@ const Reports = () => {
   const [selectedReport, setSelectedReport] = useState('fleet')
 
   const exportToCSV = (data, filename) => {
+    // Exclude certain columns from fleet export
+    const excludeColumns = filename === 'fleet-report.csv' 
+      ? ['lastServiceDate', 'fuelLevel'] 
+      : []
+    
+    const headers = Object.keys(data[0]).filter(key => !excludeColumns.includes(key))
     const csv = [
-      Object.keys(data[0]).join(','),
-      ...data.map(obj => Object.values(obj).join(','))
+      headers.join(','),
+      ...data.map(obj => headers.map(key => obj[key]).join(','))
     ].join('\n')
 
     const blob = new Blob([csv], { type: 'text/csv' })
