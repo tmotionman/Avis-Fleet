@@ -1,6 +1,6 @@
 import React from 'react'
 import { X, Menu } from 'lucide-react'
-import { FaChartLine, FaCarSide, FaTools, FaFileAlt, FaUsers, FaLink } from 'react-icons/fa'
+import { FaChartLine, FaCarSide, FaFileAlt, FaUsers, FaLink } from 'react-icons/fa'
 import { motion } from 'framer-motion'
 
 // Always-expanded sidebar (w-64) - icons + labels
@@ -8,8 +8,7 @@ const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) =
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: FaChartLine },
     { id: 'fleet', label: 'Fleet Management', icon: FaCarSide },
-    { id: 'assignment', label: 'Fleet Assignment', icon: FaLink },
-    { id: 'maintenance', label: 'Maintenance', icon: FaTools },
+  { id: 'assignment', label: 'Fleet Assignment', icon: FaLink },
     { id: 'fuel', label: 'Clients', icon: FaUsers },
     { id: 'reports', label: 'Reports', icon: FaFileAlt },
     { id: 'users', label: 'User Management', icon: FaUsers },
