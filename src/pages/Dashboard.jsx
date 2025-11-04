@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import KPICard from '../components/KPICard'
-import { FaCarSide, FaCheckCircle, FaMapLocationDot } from 'react-icons/fa'
+import { FaCarSide, FaCheckCircle, FaCar } from 'react-icons/fa'
 import { FleetUtilizationChart, VehicleStatusChart } from '../components/Charts'
 import vehiclesData from '../data/vehicles.json'
 
@@ -62,7 +62,7 @@ const Dashboard = () => {
           color="#22C55E"
         />
         <KPICard
-          icon={<FaMapLocationDot />}
+          icon={<FaCar />}
           label="In Service"
           value={vehiclesInService}
           trend={2}
