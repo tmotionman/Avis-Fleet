@@ -7,8 +7,8 @@ import { motion } from 'framer-motion'
 const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: FaChartLine },
+    { id: 'assignment', label: 'Fleet Assignment', icon: FaLink },
     { id: 'fleet', label: 'Fleet Management', icon: FaCarSide },
-  { id: 'assignment', label: 'Fleet Assignment', icon: FaLink },
     { id: 'fuel', label: 'Clients', icon: FaUsers },
     { id: 'reports', label: 'Reports', icon: FaFileAlt },
     { id: 'users', label: 'User Management', icon: FaUsers },
