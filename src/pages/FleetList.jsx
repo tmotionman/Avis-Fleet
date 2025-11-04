@@ -188,7 +188,6 @@ const FleetList = () => {
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Model</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Mileage</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Last Service</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Actions</th>
               </tr>
             </thead>
@@ -209,7 +208,6 @@ const FleetList = () => {
                       {vehicle.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{vehicle.lastServiceDate}</td>
                   <td className="px-6 py-4 flex gap-2">
                     <motion.button
                       whileHover={{ scale: 1.1 }}
