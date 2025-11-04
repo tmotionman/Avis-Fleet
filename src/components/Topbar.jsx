@@ -25,8 +25,8 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
   })
 
   const notifications = [
-    { id: 1, message: 'Vehicle VEH005 requires maintenance', priority: 'high' },
-    { id: 2, message: 'Fuel card limit reached for VEH002', priority: 'medium' },
+    { id: 1, message: 'New vehicle added to fleet: VEH009', priority: 'high' },
+    { id: 2, message: 'Fleet assignment updated for client ABC Corp', priority: 'medium' },
     { id: 3, message: 'New user registration pending approval', priority: 'low' },
   ]
 

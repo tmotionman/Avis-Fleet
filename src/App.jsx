@@ -6,7 +6,6 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import FleetList from './pages/FleetList'
 import FleetAssignment from './pages/FleetAssignment'
-import MaintenanceTracker from './pages/MaintenanceTracker'
 import Clients from './pages/Clients'
 import Reports from './pages/Reports'
 import UserManagement from './pages/UserManagement'
@@ -68,9 +67,7 @@ function App() {
         return <FleetList />
       case 'assignment':
         return <FleetAssignment />
-      case 'maintenance':
-        return <MaintenanceTracker />
-      case 'fuel':
+      case 'clients':
         return <Clients />
       case 'reports':
         return <Reports />

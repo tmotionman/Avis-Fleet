@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
-import { Download, FileText } from 'lucide-react'
+import { Download } from 'lucide-react'
 import { motion } from 'framer-motion'
 import vehiclesData from '../data/vehicles.json'
-import maintenanceData from '../data/maintenance.json'
-import fuelData from '../data/fuel.json'
+import usersData from '../data/users.json'
 
 const Reports = () => {
   const [selectedReport, setSelectedReport] = useState('fleet')
@@ -88,51 +87,45 @@ const Reports = () => {
     </motion.div>
   )
 
-  const MaintenanceReport = () => (
+  const UsersReport = () => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-avis-black mb-4">Maintenance Report Summary</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <h3 className="text-lg font-semibold text-avis-black mb-4">User Management Report</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 bg-gray-50 rounded-lg">
-            <p className="text-gray-600">Total Records</p>
-            <p className="text-2xl font-bold text-avis-black mt-2">{maintenanceData.length}</p>
+            <p className="text-gray-600">Total Users</p>
+            <p className="text-2xl font-bold text-avis-black mt-2">{usersData.length}</p>
           </div>
           <div className="p-4 bg-gray-50 rounded-lg">
-            <p className="text-gray-600">Total Cost</p>
-            <p className="text-2xl font-bold text-avis-red mt-2">R{maintenanceData.reduce((sum, m) => sum + m.cost, 0).toLocaleString('en-ZA', { maximumFractionDigits: 0 })}</p>
-          </div>
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <p className="text-gray-600">Pending Services</p>
-            <p className="text-2xl font-bold text-yellow-600 mt-2">{maintenanceData.filter(m => m.status === 'Scheduled').length}</p>
+            <p className="text-gray-600">Active Users</p>
+            <p className="text-2xl font-bold text-green-600 mt-2">{usersData.filter(u => u.status === 'Active').length}</p>
           </div>
         </div>
       </div>
 
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-avis-black mb-4">Maintenance Details</h3>
+        <h3 className="text-lg font-semibold text-avis-black mb-4">User Details</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-2 text-left">Vehicle</th>
-                <th className="px-4 py-2 text-left">Service Type</th>
-                <th className="px-4 py-2 text-left">Date</th>
-                <th className="px-4 py-2 text-left">Cost</th>
+                <th className="px-4 py-2 text-left">Name</th>
+                <th className="px-4 py-2 text-left">Email</th>
+                <th className="px-4 py-2 text-left">Role</th>
                 <th className="px-4 py-2 text-left">Status</th>
               </tr>
             </thead>
             <tbody>
-              {maintenanceData.map((m, i) => (
+              {usersData.map((u, i) => (
                 <tr key={i} className="border-b">
-                  <td className="px-4 py-2">{m.vehicleNo}</td>
-                  <td className="px-4 py-2">{m.serviceType}</td>
-                  <td className="px-4 py-2">{m.date}</td>
-                  <td className="px-4 py-2">R{m.cost}</td>
-                  <td className="px-4 py-2"><span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">{m.status}</span></td>
+                  <td className="px-4 py-2">{u.name}</td>
+                  <td className="px-4 py-2">{u.email}</td>
+                  <td className="px-4 py-2">{u.role}</td>
+                  <td className="px-4 py-2"><span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">{u.status}</span></td>
                 </tr>
               ))}
             </tbody>
@@ -143,75 +136,11 @@ const Reports = () => {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => exportToCSV(maintenanceData, 'maintenance-report.csv')}
+        onClick={() => exportToCSV(usersData, 'users-report.csv')}
         className="btn-primary flex items-center gap-2"
       >
         <Download size={20} />
-        Export Maintenance Report to CSV
-      </motion.button>
-    </motion.div>
-  )
-
-  const FuelReport = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-6"
-    >
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-avis-black mb-4">Fuel Report Summary</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <p className="text-gray-600">Total Spent</p>
-            <p className="text-2xl font-bold text-avis-black mt-2">R{fuelData.reduce((sum, f) => sum + f.amount, 0).toLocaleString('en-ZA', { maximumFractionDigits: 0 })}</p>
-          </div>
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <p className="text-gray-600">Total Liters</p>
-            <p className="text-2xl font-bold text-blue-600 mt-2">{fuelData.reduce((sum, f) => sum + f.liters, 0)} L</p>
-          </div>
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <p className="text-gray-600">Avg Price/L</p>
-            <p className="text-2xl font-bold text-avis-black mt-2">R{(fuelData.reduce((sum, f) => sum + f.amount, 0) / fuelData.reduce((sum, f) => sum + f.liters, 0)).toFixed(2)}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-avis-black mb-4">Fuel Transactions</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-2 text-left">Vehicle</th>
-                <th className="px-4 py-2 text-left">Date</th>
-                <th className="px-4 py-2 text-left">Liters</th>
-                <th className="px-4 py-2 text-left">Amount</th>
-                <th className="px-4 py-2 text-left">Location</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fuelData.map((f, i) => (
-                <tr key={i} className="border-b">
-                  <td className="px-4 py-2">{f.vehicleNo}</td>
-                  <td className="px-4 py-2">{f.date}</td>
-                  <td className="px-4 py-2">{f.liters} L</td>
-                  <td className="px-4 py-2">R{f.amount}</td>
-                  <td className="px-4 py-2">{f.location}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => exportToCSV(fuelData, 'fuel-report.csv')}
-        className="btn-primary flex items-center gap-2"
-      >
-        <Download size={20} />
-        Export Fuel Report to CSV
+        Export Users Report to CSV
       </motion.button>
     </motion.div>
   )
@@ -229,11 +158,10 @@ const Reports = () => {
       </div>
 
       {/* Report Type Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {[
           { id: 'fleet', label: 'Fleet Report', icon: '🚗' },
-          { id: 'maintenance', label: 'Maintenance Report', icon: '🔧' },
-          { id: 'fuel', label: 'Fuel Report', icon: '⛽' },
+          { id: 'users', label: 'Users Report', icon: '�' },
         ].map(report => (
           <motion.button
             key={report.id}
@@ -256,8 +184,7 @@ const Reports = () => {
 
       {/* Report Content */}
       {selectedReport === 'fleet' && <FleetReport />}
-      {selectedReport === 'maintenance' && <MaintenanceReport />}
-      {selectedReport === 'fuel' && <FuelReport />}
+      {selectedReport === 'users' && <UsersReport />}
     </motion.div>
   )
 }
