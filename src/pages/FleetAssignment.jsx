@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { Plus, Search, Trash2, Calendar, MapPin } from 'lucide-react'
 import { motion } from 'framer-motion'
 import vehiclesData from '../data/vehicles.json'
-import usersData from '../data/users.json'
+import clientsData from '../data/clients.json'
 
 const FleetAssignment = () => {
   const [assignments, setAssignments] = useState([])
@@ -11,7 +11,7 @@ const FleetAssignment = () => {
   const [editingAssignment, setEditingAssignment] = useState(null)
   const [formData, setFormData] = useState({
     vehicleId: '',
-    userId: '',
+    clientId: '',
     startDate: '',
     endDate: '',
     purpose: '',
@@ -26,11 +26,11 @@ const FleetAssignment = () => {
   const filteredAssignments = useMemo(() => {
     return assignments.filter(a => {
       const vehicle = vehiclesData.find(v => v.id === a.vehicleId)
-      const user = usersData.find(u => u.id === a.userId)
+      const client = clientsData.find(c => c.id === a.clientId)
       const searchLower = searchTerm.toLowerCase()
       return (
         (vehicle?.registrationNo.toLowerCase().includes(searchLower)) ||
-        (user?.name.toLowerCase().includes(searchLower)) ||
+        (client?.name.toLowerCase().includes(searchLower)) ||
         (a.purpose?.toLowerCase().includes(searchLower))
       )
     })
@@ -40,7 +40,7 @@ const FleetAssignment = () => {
     setEditingAssignment(null)
     setFormData({
       vehicleId: '',
-      userId: '',
+      clientId: '',
       startDate: '',
       endDate: '',
       purpose: '',
@@ -52,7 +52,7 @@ const FleetAssignment = () => {
     setEditingAssignment(assignment)
     setFormData({
       vehicleId: assignment.vehicleId,
-      userId: assignment.userId,
+      clientId: assignment.clientId,
       startDate: assignment.startDate,
       endDate: assignment.endDate,
       purpose: assignment.purpose,
@@ -61,8 +61,8 @@ const FleetAssignment = () => {
   }
 
   const handleSave = () => {
-    if (!formData.vehicleId || !formData.userId) {
-      alert('Please select both a vehicle and a user')
+    if (!formData.vehicleId || !formData.clientId) {
+      alert('Please select both a vehicle and a client')
       return
     }
 
@@ -100,9 +100,9 @@ const FleetAssignment = () => {
     return vehicle ? `${vehicle.registrationNo} (${vehicle.model})` : 'N/A'
   }
 
-  const getUserName = (userId) => {
-    const user = usersData.find(u => u.id === userId)
-    return user ? user.name : 'N/A'
+  const getUserName = (clientId) => {
+    const client = clientsData.find(c => c.id === clientId)
+    return client ? client.name : 'N/A'
   }
 
   const activeAssignments = assignments.filter(a => !a.returnDate)
@@ -117,8 +117,10 @@ const FleetAssignment = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-avis-black">Fleet Assignment</h1>
-          <p className="text-gray-500 mt-1">Assign available vehicles to clients</p>
+          <div>
+                <h1 className="text-3xl font-bold text-avis-black">Fleet Assignment</h1>
+                <p className="text-gray-500 mt-1">Assign available vehicles to clients</p>
+              </div>
         </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -179,7 +181,7 @@ const FleetAssignment = () => {
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 uppercase font-semibold">Client</p>
-                      <p className="text-sm font-bold text-avis-black mt-1">{getUserName(assignment.userId)}</p>
+                      <p className="text-sm font-bold text-avis-black mt-1">{getUserName(assignment.clientId)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 uppercase font-semibold">Purpose</p>
@@ -242,7 +244,7 @@ const FleetAssignment = () => {
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 uppercase font-semibold">Client</p>
-                      <p className="text-sm font-bold text-avis-black mt-1">{getUserName(assignment.userId)}</p>
+                      <p className="text-sm font-bold text-avis-black mt-1">{getUserName(assignment.clientId)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 uppercase font-semibold">Return Date</p>
@@ -313,16 +315,16 @@ const FleetAssignment = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Client / User *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Client *</label>
                 <select
-                  value={formData.userId}
-                  onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
+                  value={formData.clientId}
+                  onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
                   className="input-field"
                 >
-                  <option value="">Select a user</option>
-                  {usersData.map(u => (
-                    <option key={u.id} value={u.id}>
-                      {u.name} ({u.role})
+                  <option value="">Select a client</option>
+                  {clientsData.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
                     </option>
                   ))}
                 </select>
