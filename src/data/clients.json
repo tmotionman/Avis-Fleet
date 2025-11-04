@@ -1,0 +1,35 @@
+[
+  {
+    "id": "CLI001",
+    "name": "Acme Corporation",
+    "email": "contact@acme.com",
+    "phone": "+27-11-100-1000",
+    "address": "123 Business Park, Johannesburg",
+    "city": "Johannesburg",
+    "industry": "Technology",
+    "status": "Active",
+    "addedDate": "2024-01-15"
+  },
+  {
+    "id": "CLI002",
+    "name": "Global Logistics Ltd",
+    "email": "info@globallogistics.co.za",
+    "phone": "+27-21-200-2000",
+    "address": "456 Industrial Zone, Cape Town",
+    "city": "Cape Town",
+    "industry": "Logistics",
+    "status": "Active",
+    "addedDate": "2024-02-20"
+  },
+  {
+    "id": "CLI003",
+    "name": "Durban Services Inc",
+    "email": "sales@durbanservices.co.za",
+    "phone": "+27-31-300-3000",
+    "address": "789 Commerce Street, Durban",
+    "city": "Durban",
+    "industry": "Services",
+    "status": "Active",
+    "addedDate": "2024-03-10"
+  }
+]

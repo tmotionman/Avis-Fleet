@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Download } from 'lucide-react'
 import { motion } from 'framer-motion'
 import vehiclesData from '../data/vehicles.json'
-import usersData from '../data/users.json'
+import clientsData from '../data/clients.json'
 
 const Reports = () => {
   const [selectedReport, setSelectedReport] = useState('fleet')
@@ -87,45 +87,53 @@ const Reports = () => {
     </motion.div>
   )
 
-  const UsersReport = () => (
+  const ClientsReport = () => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-avis-black mb-4">User Management Report</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h3 className="text-lg font-semibold text-avis-black mb-4">Clients Report</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 bg-gray-50 rounded-lg">
-            <p className="text-gray-600">Total Users</p>
-            <p className="text-2xl font-bold text-avis-black mt-2">{usersData.length}</p>
+            <p className="text-gray-600">Total Clients</p>
+            <p className="text-2xl font-bold text-avis-black mt-2">{clientsData.length}</p>
           </div>
           <div className="p-4 bg-gray-50 rounded-lg">
-            <p className="text-gray-600">Active Users</p>
-            <p className="text-2xl font-bold text-green-600 mt-2">{usersData.filter(u => u.status === 'Active').length}</p>
+            <p className="text-gray-600">Active Clients</p>
+            <p className="text-2xl font-bold text-green-600 mt-2">{clientsData.filter(c => c.status === 'Active').length}</p>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-gray-600">Industries</p>
+            <p className="text-2xl font-bold text-blue-600 mt-2">{new Set(clientsData.map(c => c.industry)).size}</p>
           </div>
         </div>
       </div>
 
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-avis-black mb-4">User Details</h3>
+        <h3 className="text-lg font-semibold text-avis-black mb-4">Client Details</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-2 text-left">Name</th>
                 <th className="px-4 py-2 text-left">Email</th>
-                <th className="px-4 py-2 text-left">Role</th>
+                <th className="px-4 py-2 text-left">Phone</th>
+                <th className="px-4 py-2 text-left">Industry</th>
+                <th className="px-4 py-2 text-left">City</th>
                 <th className="px-4 py-2 text-left">Status</th>
               </tr>
             </thead>
             <tbody>
-              {usersData.map((u, i) => (
+              {clientsData.map((c, i) => (
                 <tr key={i} className="border-b">
-                  <td className="px-4 py-2">{u.name}</td>
-                  <td className="px-4 py-2">{u.email}</td>
-                  <td className="px-4 py-2">{u.role}</td>
-                  <td className="px-4 py-2"><span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">{u.status}</span></td>
+                  <td className="px-4 py-2">{c.name}</td>
+                  <td className="px-4 py-2">{c.email}</td>
+                  <td className="px-4 py-2">{c.phone}</td>
+                  <td className="px-4 py-2">{c.industry}</td>
+                  <td className="px-4 py-2">{c.city}</td>
+                  <td className="px-4 py-2"><span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">{c.status}</span></td>
                 </tr>
               ))}
             </tbody>
@@ -136,11 +144,11 @@ const Reports = () => {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => exportToCSV(usersData, 'users-report.csv')}
+        onClick={() => exportToCSV(clientsData, 'clients-report.csv')}
         className="btn-primary flex items-center gap-2"
       >
         <Download size={20} />
-        Export Users Report to CSV
+        Export Clients Report to CSV
       </motion.button>
     </motion.div>
   )
@@ -161,7 +169,7 @@ const Reports = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {[
           { id: 'fleet', label: 'Fleet Report', icon: '🚗' },
-          { id: 'users', label: 'Users Report', icon: '�' },
+          { id: 'clients', label: 'Clients Report', icon: '👥' },
         ].map(report => (
           <motion.button
             key={report.id}
@@ -184,7 +192,7 @@ const Reports = () => {
 
       {/* Report Content */}
       {selectedReport === 'fleet' && <FleetReport />}
-      {selectedReport === 'users' && <UsersReport />}
+      {selectedReport === 'clients' && <ClientsReport />}
     </motion.div>
   )
 }
