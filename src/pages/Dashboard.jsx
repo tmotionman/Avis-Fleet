@@ -91,12 +91,6 @@ const Dashboard = () => {
             {(vehiclesData.reduce((sum, v) => sum + v.mileage, 0) / vehiclesData.length).toLocaleString('en-ZA', { maximumFractionDigits: 0 })} km
           </p>
         </div>
-        <div className="bg-white p-4 md:p-6 rounded-lg md:rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-xs md:text-sm font-semibold text-gray-500 uppercase">Fleet Age</h3>
-          <p className="text-lg md:text-2xl font-bold text-avis-black mt-2">
-            {Math.round(vehiclesData.reduce((sum, v) => sum + (2025 - v.year), 0) / vehiclesData.length)} years
-          </p>
-        </div>
       </motion.div>
     </motion.div>
   )
