@@ -117,18 +117,7 @@ const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) =
           })}
         </nav>
 
-        {/* Mobile User Profile */}
-        <div className="border-t border-gray-800 bg-gray-900 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center text-white font-bold">
-              A
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-white">Admin User</p>
-              <p className="text-xs text-gray-500">Administrator</p>
-            </div>
-          </div>
-        </div>
+        {/* Mobile User Profile removed for mobile view per request */}
         {/* Mobile copyright */}
         <div className="px-4 py-3 text-center">
           <p className="text-xs text-gray-400">© 2025 Ancestro</p>
