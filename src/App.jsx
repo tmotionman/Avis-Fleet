@@ -194,7 +194,9 @@ function App() {
   const handleLogin = (userData) => {
     setCurrentUser(userData)
     setIsAuthenticated(true)
-    setIsTourMode(false)
+    // FOR TESTING: Show tour on every login
+    setIsTourMode(true)
+    setShowTour(true)
     try {
       localStorage.setItem('avis_isAuthenticated', 'true')
       localStorage.setItem('avis_currentUser', JSON.stringify(userData))
