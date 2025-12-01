@@ -385,6 +385,9 @@ function App() {
           setSidebarOpen={setSidebarOpen} 
           onLogout={handleLogout}
           onProfileUpdate={setCurrentUser}
+          vehicles={vehicles}
+          clients={clients}
+          users={users}
         />
 
         {/* Page Content */}

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Menu, Search, Bell, User, LogOut, Settings, ChevronDown, Upload, X } from 'lucide-react'
 import { motion } from 'framer-motion'
 import AvisLogoWebp from '../assets/Avis.webp'
@@ -273,7 +273,7 @@ const SettingsModal = ({ showSettingsModal, setShowSettingsModal, settings, setS
   )
 }
 
-const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileUpdate }) => {
+const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileUpdate, vehicles = [], clients = [], users = [] }) => {
   const [profileOpen, setProfileOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
@@ -282,6 +282,10 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
   const [isSaving, setIsSaving] = useState(false)
   const fileInputRef = useRef(null)
   const modalContentRef = useRef(null)
+  const searchRef = useRef(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const [showSearchResults, setShowSearchResults] = useState(false)
   const [savedProfilePhoto, setSavedProfilePhoto] = useState(currentUser?.avatarUrl || null)
   const [profileData, setProfileData] = useState({
     name: currentUser?.name || 'User',
@@ -405,6 +409,99 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
     }
   }
 
+  // Handle search functionality
+  const handleSearch = (query) => {
+    setSearchQuery(query)
+    
+    if (!query.trim()) {
+      setSearchResults([])
+      setShowSearchResults(false)
+      return
+    }
+
+    const lowerQuery = query.toLowerCase()
+    const results = []
+
+    // Search vehicles
+    vehicles.forEach(vehicle => {
+      if (
+        vehicle.registrationNo?.toLowerCase().includes(lowerQuery) ||
+        vehicle.model?.toLowerCase().includes(lowerQuery) ||
+        vehicle.location?.toLowerCase().includes(lowerQuery)
+      ) {
+        results.push({
+          type: 'vehicle',
+          id: vehicle.id,
+          title: vehicle.registrationNo,
+          subtitle: vehicle.model,
+          data: vehicle,
+        })
+      }
+    })
+
+    // Search clients
+    clients.forEach(client => {
+      if (
+        client.name?.toLowerCase().includes(lowerQuery) ||
+        client.email?.toLowerCase().includes(lowerQuery) ||
+        client.phone?.toLowerCase().includes(lowerQuery) ||
+        client.city?.toLowerCase().includes(lowerQuery)
+      ) {
+        results.push({
+          type: 'client',
+          id: client.id,
+          title: client.name,
+          subtitle: client.city || client.email,
+          data: client,
+        })
+      }
+    })
+
+    // Search users
+    users.forEach(user => {
+      if (
+        user.name?.toLowerCase().includes(lowerQuery) ||
+        user.email?.toLowerCase().includes(lowerQuery)
+      ) {
+        results.push({
+          type: 'user',
+          id: user.id,
+          title: user.name,
+          subtitle: user.email,
+          data: user,
+        })
+      }
+    })
+
+    setSearchResults(results.slice(0, 8)) // Limit to 8 results
+    setShowSearchResults(query.trim().length > 0)
+  }
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSearchResults(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Keyboard shortcut for search (Ctrl+K or Cmd+K)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        document.querySelector('input[placeholder="Search vehicles, users..."]')?.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
 
   return (
     <div className="fixed top-0 left-0 right-0 lg:left-64 z-40 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
@@ -424,13 +521,66 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
       {/* Right Section */}
       <div className="flex items-center gap-6">
         {/* Search Bar */}
-        <div className="hidden md:flex items-center bg-gray-100 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-avis-red transition-all">
-          <Search size={18} className="text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search vehicles, users..."
-            className="bg-transparent ml-2 outline-none text-sm w-40"
-          />
+        <div ref={searchRef} className="hidden md:block relative">
+          <div className="flex items-center bg-gray-100 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-avis-red transition-all">
+            <Search size={18} className="text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search vehicles, users... (Ctrl+K)"
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              onFocus={() => searchQuery && setShowSearchResults(true)}
+              className="bg-transparent ml-2 outline-none text-sm w-40"
+            />
+          </div>
+
+          {/* Search Results Dropdown */}
+          {showSearchResults && searchResults.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto"
+            >
+              {searchResults.map((result, index) => (
+                <div
+                  key={`${result.type}-${result.id}`}
+                  className="px-4 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-start gap-3">
+                    {/* Type Badge */}
+                    <div className={`px-2 py-1 rounded text-xs font-semibold text-white flex-shrink-0 ${
+                      result.type === 'vehicle' ? 'bg-blue-500' :
+                      result.type === 'client' ? 'bg-green-500' :
+                      'bg-purple-500'
+                    }`}>
+                      {result.type === 'vehicle' ? 'Vehicle' :
+                       result.type === 'client' ? 'Client' :
+                       'User'}
+                    </div>
+                    
+                    {/* Result Content */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">{result.title}</p>
+                      <p className="text-xs text-gray-500 truncate">{result.subtitle}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          )}
+
+          {/* No Results Message */}
+          {showSearchResults && searchResults.length === 0 && searchQuery && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 p-4 text-center"
+            >
+              <p className="text-sm text-gray-500">No results found for "{searchQuery}"</p>
+            </motion.div>
+          )}
         </div>
 
         {/* Notifications */}
