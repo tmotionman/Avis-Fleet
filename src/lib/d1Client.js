@@ -151,6 +151,11 @@ export const dashboardApi = {
   getStats: () => apiFetch('/api/stats'),
 };
 
+// ============== EXCHANGE RATES ==============
+export const exchangeRatesApi = {
+  getRates: () => apiFetch('/api/exchange-rates'),
+};
+
 // ============== HEALTH CHECK ==============
 export const healthCheck = () => apiFetch('/api/health');
 
@@ -162,5 +167,6 @@ export default {
   maintenance: maintenanceApi,
   users: usersApi,
   dashboard: dashboardApi,
+  exchangeRates: exchangeRatesApi,
   healthCheck,
 };

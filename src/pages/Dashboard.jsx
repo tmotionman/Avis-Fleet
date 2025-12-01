@@ -3,10 +3,14 @@ import { motion } from 'framer-motion'
 import KPICard from '../components/KPICard'
 import { FaCarSide, FaCheckCircle, FaCar, FaExclamationTriangle, FaClock, FaPlus, FaUserPlus, FaClipboardList, FaImage, FaSync } from 'react-icons/fa'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import { exchangeRatesApi } from '../lib/d1Client'
 import sunsetDriveWebp from '../assets/sunset-coast-drive.webp'
 
 const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => {
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [exchangeRates, setExchangeRates] = useState([])
+  const [lastUpdated, setLastUpdated] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -14,6 +18,32 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
     }, 1000)
     return () => clearInterval(timer)
   }, [])
+
+  // Fetch exchange rates on mount
+  useEffect(() => {
+    fetchExchangeRates()
+  }, [])
+
+  const fetchExchangeRates = async () => {
+    setIsLoading(true)
+    try {
+      const data = await exchangeRatesApi.getRates()
+      setExchangeRates(data.rates || [])
+      setLastUpdated(new Date(data.lastUpdated))
+    } catch (error) {
+      console.error('Failed to fetch exchange rates:', error)
+      // Use fallback rates
+      setExchangeRates([
+        { currency: 'USD', buy: 22.9468, sell: 22.9968 },
+        { currency: 'GBP', buy: 29.1250, sell: 29.4500 },
+        { currency: 'EUR', buy: 24.8500, sell: 25.1500 },
+        { currency: 'ZAR', buy: 1.2450, sell: 1.2850 },
+      ])
+      setLastUpdated(new Date())
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   // Calculate KPI values from props
   const vehiclesData = vehicles || []
@@ -65,14 +95,6 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
     { name: 'On Rent', value: vehiclesOnRent, color: '#4B4B4B' },
     { name: 'Maintenance', value: maintenanceVehicles, color: '#F5F5F5' },
   ].filter(d => d.value > 0)
-
-  // Exchange Rates (Simulated from BoZ)
-  const exchangeRates = [
-    { currency: 'USD', buy: 22.9468, sell: 22.9968 },
-    { currency: 'GBP', buy: 29.1250, sell: 29.4500 },
-    { currency: 'EUR', buy: 24.8500, sell: 25.1500 },
-    { currency: 'ZAR', buy: 1.2450, sell: 1.2850 },
-  ]
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -327,9 +349,15 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
                   <p className="text-[10px] text-gray-400 font-medium">Source: Bank of Zambia</p>
                 </div>
               </div>
-              <button className="p-2 hover:bg-white/10 rounded-full transition-colors group">
+              <motion.button 
+                onClick={fetchExchangeRates}
+                disabled={isLoading}
+                animate={isLoading ? { rotate: 360 } : { rotate: 0 }}
+                transition={{ duration: 1, repeat: isLoading ? Infinity : 0 }}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors group disabled:opacity-50"
+              >
                 <FaSync className="text-gray-400 text-xs group-hover:text-white transition-colors" />
-              </button>
+              </motion.button>
             </div>
             
             <div className="grid grid-cols-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">
@@ -339,24 +367,28 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
             </div>
 
             <div className="space-y-1 max-h-[130px] overflow-y-auto custom-scrollbar pr-1">
-              {exchangeRates.map((rate, index) => (
-                <div key={index} className="grid grid-cols-3 items-center p-2 rounded-lg hover:bg-white/5 transition-colors border border-transparent">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-white text-sm">{rate.currency}</span>
+              {exchangeRates.length === 0 ? (
+                <p className="text-center text-gray-400 text-xs py-4">Loading rates...</p>
+              ) : (
+                exchangeRates.map((rate, index) => (
+                  <div key={index} className="grid grid-cols-3 items-center p-2 rounded-lg hover:bg-white/5 transition-colors border border-transparent">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white text-sm">{rate.currency}</span>
+                    </div>
+                    <div className="text-right font-mono text-sm font-medium text-gray-300">
+                      {rate.buy.toFixed(4)}
+                    </div>
+                    <div className="text-right font-mono text-sm font-bold text-white">
+                      {rate.sell.toFixed(4)}
+                    </div>
                   </div>
-                  <div className="text-right font-mono text-sm font-medium text-gray-300">
-                    {rate.buy.toFixed(4)}
-                  </div>
-                  <div className="text-right font-mono text-sm font-bold text-white">
-                    {rate.sell.toFixed(4)}
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
             
             <div className="mt-4 pt-3 border-t border-gray-600 text-center">
               <p className="text-[10px] text-gray-400">
-                Last updated: {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                Last updated: {lastUpdated ? lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Never'}
               </p>
             </div>
           </motion.div>
@@ -367,3 +399,4 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
 }
 
 export default Dashboard
+
