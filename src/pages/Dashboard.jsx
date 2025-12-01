@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import KPICard from '../components/KPICard'
 import { FaCarSide, FaCheckCircle, FaCar, FaExclamationTriangle, FaClock, FaPlus, FaUserPlus, FaClipboardList, FaImage, FaSync } from 'react-icons/fa'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import sunsetDriveWebp from '../assets/sunset-coast-drive.webp'
 
 const Dashboard = ({ vehicles, assignments = [], onNavigate }) => {
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -136,8 +137,9 @@ const Dashboard = ({ vehicles, assignments = [], onNavigate }) => {
           {/* Image Placeholder Card */}
           <div className="bg-avis-darkgray rounded-xl shadow-sm border border-avis-darkgray h-48 flex items-center justify-center overflow-hidden relative group cursor-pointer hover:shadow-md transition-all duration-200">
             <img 
-              src="/assets/sunset-coast-drive.jpg" 
+              src={sunsetDriveWebp}
               alt="Featured Vehicle" 
+              loading="lazy"
               className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />

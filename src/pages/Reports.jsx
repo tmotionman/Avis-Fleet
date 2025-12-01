@@ -5,7 +5,7 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import clientsData from '../data/clients.json'
 import KPICard from '../components/KPICard'
-import avisLogo from '../assets/Avis.png'
+import avisLogoWebp from '../assets/Avis.webp'
 
 const Reports = ({ vehicles, assignments = [] }) => {
   const [selectedReport, setSelectedReport] = useState('fleet')
@@ -63,7 +63,7 @@ const Reports = ({ vehicles, assignments = [] }) => {
     
     // Load Logo
     try {
-      const logoBase64 = await getBase64ImageFromURL(avisLogo)
+      const logoBase64 = await getBase64ImageFromURL(avisLogoWebp)
       doc.addImage(logoBase64, 'PNG', 14, 10, 40, 12) // Adjust dimensions as needed
     } catch (error) {
       console.error("Error loading logo:", error)

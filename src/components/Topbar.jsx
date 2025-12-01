@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react'
 import { Menu, Search, Bell, User, LogOut, Settings, ChevronDown, Upload, X } from 'lucide-react'
 import { motion } from 'framer-motion'
-import AvisLogo from '../../assets/Avis.png'
+import AvisLogoWebp from '../../assets/Avis.webp'
 import CustomSelect from './CustomSelect'
 
 const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
@@ -344,7 +344,7 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
           <Menu size={24} />
         </button>
         <div className="hidden lg:block">
-          <img src={AvisLogo} alt="Avis" className="h-8 w-auto object-contain" />
+          <img src={AvisLogoWebp} alt="Avis" className="h-8 w-auto object-contain" loading="lazy" />
         </div>
       </div>
 
