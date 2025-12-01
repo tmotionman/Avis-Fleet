@@ -4,97 +4,21 @@ import { motion } from 'framer-motion'
 import AvisLogoWebp from '../assets/Avis.webp'
 import CustomSelect from './CustomSelect'
 
-const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
-  const [profileOpen, setProfileOpen] = useState(false)
-  const [notificationsOpen, setNotificationsOpen] = useState(false)
-  const [showProfileModal, setShowProfileModal] = useState(false)
-  const [showSettingsModal, setShowSettingsModal] = useState(false)
-  const [dragActive, setDragActive] = useState(false)
-  const fileInputRef = useRef(null)
-  const [savedProfilePhoto, setSavedProfilePhoto] = useState(null)
-  const [profileData, setProfileData] = useState({
-    name: currentUser?.name || 'User',
-    email: currentUser?.email || '',
-    role: currentUser?.role || 'User',
-    phone: '+27-11-123-4567',
-    department: 'Operations',
-    joinDate: '2024-01-15',
-    profilePhoto: null,
-  })
-  const [settings, setSettings] = useState({
-    emailNotifications: true,
-    smsNotifications: false,
-    darkMode: false,
-    twoFactor: true,
-    language: 'English',
-  })
+// Profile Modal Component - Extracted to prevent re-mounting on parent re-render
+const ProfileModal = ({ showProfileModal, setShowProfileModal, profileData, setProfileData, dragActive, setDragActive, fileInputRef, handleDrag, handleDrop, handleInputChange, removeProfilePhoto, handleProfileSave }) => {
+  if (!showProfileModal) return null
 
-  const notifications = [
-    { id: 1, message: 'New vehicle added to fleet: VEH009', priority: 'high' },
-    { id: 2, message: 'Fleet assignment updated for client ABC Corp', priority: 'medium' },
-    { id: 3, message: 'New user registration pending approval', priority: 'low' },
-  ]
-
-  const handleProfileSave = () => {
-    if (profileData.profilePhoto) {
-      setSavedProfilePhoto(profileData.profilePhoto)
-    }
-    setShowProfileModal(false)
-  }
-
-  const handleSettingsSave = () => {
-    setShowSettingsModal(false)
-  }
-
-  const handleFileSelect = (file) => {
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setProfileData({ ...profileData, profilePhoto: e.target.result })
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleDrag = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true)
-    } else if (e.type === 'dragleave') {
-      setDragActive(false)
-    }
-  }
-
-  const handleDrop = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-    
-    const files = e.dataTransfer.files
-    if (files && files[0]) {
-      handleFileSelect(files[0])
-    }
-  }
-
-  const handleInputChange = (e) => {
-    const files = e.target.files
-    if (files && files[0]) {
-      handleFileSelect(files[0])
-    }
-  }
-
-  const removeProfilePhoto = () => {
-    setProfileData({ ...profileData, profilePhoto: null })
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
-  }
-
-  // Profile Modal Component
-  const ProfileModal = () => (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+  return (
+    <div 
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" 
+      onClick={(e) => e.target === e.currentTarget && setShowProfileModal(false)}
+      onMouseDown={(e) => e.target === e.currentTarget && e.preventDefault()}
+    >
+      <div 
+        className="bg-white rounded-lg shadow-xl max-w-md w-full" 
+        onClick={(e) => e.stopPropagation()} 
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">My Profile</h2>
           <button
@@ -239,11 +163,23 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
       </div>
     </div>
   )
+}
 
-  // Settings Modal Component
-  const SettingsModal = () => (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+// Settings Modal Component - Extracted to prevent re-mounting on parent re-render
+const SettingsModal = ({ showSettingsModal, setShowSettingsModal, settings, setSettings }) => {
+  if (!showSettingsModal) return null
+
+  return (
+    <div 
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" 
+      onClick={(e) => e.target === e.currentTarget && setShowSettingsModal(false)} 
+      onMouseDown={(e) => e.target === e.currentTarget && e.preventDefault()}
+    >
+      <div 
+        className="bg-white rounded-lg shadow-xl max-w-md w-full" 
+        onClick={(e) => e.stopPropagation()} 
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">Settings</h2>
           <button
@@ -323,7 +259,7 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={handleSettingsSave}
+            onClick={() => setShowSettingsModal(false)}
             className="px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
           >
             Save Changes
@@ -332,6 +268,96 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
       </div>
     </div>
   )
+}
+
+const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [showProfileModal, setShowProfileModal] = useState(false)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
+  const fileInputRef = useRef(null)
+  const modalContentRef = useRef(null)
+  const [savedProfilePhoto, setSavedProfilePhoto] = useState(null)
+  const [profileData, setProfileData] = useState({
+    name: currentUser?.name || 'User',
+    email: currentUser?.email || '',
+    role: currentUser?.role || 'User',
+    phone: '+27-11-123-4567',
+    department: 'Operations',
+    joinDate: '2024-01-15',
+    profilePhoto: null,
+  })
+  const [settings, setSettings] = useState({
+    emailNotifications: true,
+    smsNotifications: false,
+    darkMode: false,
+    twoFactor: true,
+    language: 'English',
+  })
+
+  const notifications = [
+    { id: 1, message: 'New vehicle added to fleet: VEH009', priority: 'high' },
+    { id: 2, message: 'Fleet assignment updated for client ABC Corp', priority: 'medium' },
+    { id: 3, message: 'New user registration pending approval', priority: 'low' },
+  ]
+
+  const handleProfileSave = () => {
+    if (profileData.profilePhoto) {
+      setSavedProfilePhoto(profileData.profilePhoto)
+    }
+    setShowProfileModal(false)
+  }
+
+  const handleSettingsSave = () => {
+    setShowSettingsModal(false)
+  }
+
+  const handleFileSelect = (file) => {
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setProfileData({ ...profileData, profilePhoto: e.target.result })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleDrag = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true)
+    } else if (e.type === 'dragleave') {
+      setDragActive(false)
+    }
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+    
+    const files = e.dataTransfer.files
+    if (files && files[0]) {
+      handleFileSelect(files[0])
+    }
+  }
+
+  const handleInputChange = (e) => {
+    const files = e.target.files
+    if (files && files[0]) {
+      handleFileSelect(files[0])
+    }
+  }
+
+  const removeProfilePhoto = () => {
+    setProfileData({ ...profileData, profilePhoto: null })
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
 
   return (
     <div className="fixed top-0 left-0 right-0 lg:left-64 z-40 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
@@ -464,8 +490,26 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
       </div>
 
       {/* Modals */}
-      {showProfileModal && <ProfileModal />}
-      {showSettingsModal && <SettingsModal />}
+      <ProfileModal 
+        showProfileModal={showProfileModal}
+        setShowProfileModal={setShowProfileModal}
+        profileData={profileData}
+        setProfileData={setProfileData}
+        dragActive={dragActive}
+        setDragActive={setDragActive}
+        fileInputRef={fileInputRef}
+        handleDrag={handleDrag}
+        handleDrop={handleDrop}
+        handleInputChange={handleInputChange}
+        removeProfilePhoto={removeProfilePhoto}
+        handleProfileSave={handleProfileSave}
+      />
+      <SettingsModal 
+        showSettingsModal={showSettingsModal}
+        setShowSettingsModal={setShowSettingsModal}
+        settings={settings}
+        setSettings={setSettings}
+      />
     </div>
   )
 }

@@ -57,6 +57,15 @@ const generateId = (prefix) => {
   return `${prefix}${timestamp}${random}`.toUpperCase();
 };
 
+// Hash a password using SHA-256 and return hex string
+async function hashPassword(password) {
+  const enc = new TextEncoder();
+  const data = enc.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 // Main request handler
 export default {
   async fetch(request, env, ctx) {
@@ -80,14 +89,14 @@ export default {
       // Route handling
       // ============== VEHICLES ==============
       if (path === '/api/vehicles' && method === 'GET') {
-        return await getVehicles(env.DB, allowedOrigin, allowedOrigins);
+        return await getVehicles(url, env.DB, allowedOrigin, allowedOrigins);
       }
       if (path === '/api/vehicles' && method === 'POST') {
         return await createVehicle(request, env.DB, allowedOrigin, allowedOrigins);
       }
       if (path.match(/^\/api\/vehicles\/[\w-]+$/) && method === 'GET') {
         const id = path.split('/').pop();
-        return await getVehicle(id, env.DB, allowedOrigin, allowedOrigins);
+        return await getVehicle(id, url, env.DB, allowedOrigin, allowedOrigins);
       }
       if (path.match(/^\/api\/vehicles\/[\w-]+$/) && method === 'PUT') {
         const id = path.split('/').pop();
@@ -95,12 +104,12 @@ export default {
       }
       if (path.match(/^\/api\/vehicles\/[\w-]+$/) && method === 'DELETE') {
         const id = path.split('/').pop();
-        return await deleteVehicle(id, env.DB, allowedOrigin, allowedOrigins);
+        return await deleteVehicle(id, url, env.DB, allowedOrigin, allowedOrigins);
       }
 
       // ============== CLIENTS ==============
       if (path === '/api/clients' && method === 'GET') {
-        return await getClients(env.DB, allowedOrigin, allowedOrigins);
+        return await getClients(url, env.DB, allowedOrigin, allowedOrigins);
       }
       if (path === '/api/clients' && method === 'POST') {
         return await createClient(request, env.DB, allowedOrigin, allowedOrigins);
@@ -120,14 +129,14 @@ export default {
 
       // ============== ASSIGNMENTS ==============
       if (path === '/api/assignments' && method === 'GET') {
-        return await getAssignments(env.DB, allowedOrigin, allowedOrigins);
+        return await getAssignments(url, env.DB, allowedOrigin, allowedOrigins);
       }
       if (path === '/api/assignments' && method === 'POST') {
         return await createAssignment(request, env.DB, allowedOrigin, allowedOrigins);
       }
       if (path.match(/^\/api\/assignments\/[\w-]+$/) && method === 'GET') {
         const id = path.split('/').pop();
-        return await getAssignment(id, env.DB, allowedOrigin, allowedOrigins);
+        return await getAssignment(id, url, env.DB, allowedOrigin, allowedOrigins);
       }
       if (path.match(/^\/api\/assignments\/[\w-]+$/) && method === 'PUT') {
         const id = path.split('/').pop();
@@ -186,23 +195,44 @@ export default {
 };
 
 // ============== VEHICLE HANDLERS ==============
-async function getVehicles(db, allowedOrigin, allowedOrigins) {
-  const { results } = await db.prepare(`
+async function getVehicles(url, db, allowedOrigin, allowedOrigins) {
+  const userId = url.searchParams.get('userId');
+  
+  let query = `
     SELECT id, registration_no as registrationNo, model, year, mileage, 
            status, last_service_date as lastServiceDate, location, 
            assigned_to as assignedTo, added_date as addedDate
-    FROM vehicles ORDER BY created_at DESC
-  `).all();
+    FROM vehicles`;
+  
+  if (userId) {
+    query += ` WHERE user_id = ?`;
+  }
+  
+  query += ` ORDER BY created_at DESC`;
+  
+  const { results } = userId 
+    ? await db.prepare(query).bind(userId).all()
+    : await db.prepare(query).all();
+  
   return jsonResponse(results, 200, allowedOrigin, allowedOrigins);
 }
 
-async function getVehicle(id, db, allowedOrigin, allowedOrigins) {
-  const result = await db.prepare(`
+async function getVehicle(id, url, db, allowedOrigin, allowedOrigins) {
+  const userId = url.searchParams.get('userId');
+  
+  let query = `
     SELECT id, registration_no as registrationNo, model, year, mileage, 
            status, last_service_date as lastServiceDate, location, 
            assigned_to as assignedTo, added_date as addedDate
-    FROM vehicles WHERE id = ?
-  `).bind(id).first();
+    FROM vehicles WHERE id = ?`;
+  
+  let result;
+  if (userId) {
+    query += ` AND user_id = ?`;
+    result = await db.prepare(query).bind(id, userId).first();
+  } else {
+    result = await db.prepare(query).bind(id).first();
+  }
   
   if (!result) return errorResponse('Vehicle not found', 404, allowedOrigin, allowedOrigins);
   return jsonResponse(result, 200, allowedOrigin, allowedOrigins);
@@ -213,8 +243,8 @@ async function createVehicle(request, db, allowedOrigin, allowedOrigins) {
   const id = generateId('VEH');
   
   await db.prepare(`
-    INSERT INTO vehicles (id, registration_no, model, year, mileage, status, last_service_date, location, assigned_to)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO vehicles (id, registration_no, model, year, mileage, status, last_service_date, location, assigned_to, user_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).bind(
     id,
     data.registrationNo,
@@ -224,7 +254,8 @@ async function createVehicle(request, db, allowedOrigin, allowedOrigins) {
     data.status || 'Available',
     data.lastServiceDate || null,
     data.location || null,
-    data.assignedTo || null
+    data.assignedTo || null,
+    data.userId || null
   ).run();
   
   return jsonResponse({ id, ...data, message: 'Vehicle created successfully' }, 201, allowedOrigin, allowedOrigins);
@@ -260,18 +291,36 @@ async function updateVehicle(id, request, db, allowedOrigin, allowedOrigins) {
   return jsonResponse({ id, message: 'Vehicle updated successfully' }, 200, allowedOrigin, allowedOrigins);
 }
 
-async function deleteVehicle(id, db, allowedOrigin, allowedOrigins) {
-  await db.prepare('DELETE FROM vehicles WHERE id = ?').bind(id).run();
+async function deleteVehicle(id, url, db, allowedOrigin, allowedOrigins) {
+  const userId = url.searchParams.get('userId');
+  
+  if (userId) {
+    await db.prepare('DELETE FROM vehicles WHERE id = ? AND user_id = ?').bind(id, userId).run();
+  } else {
+    await db.prepare('DELETE FROM vehicles WHERE id = ?').bind(id).run();
+  }
   return jsonResponse({ message: 'Vehicle deleted successfully' }, 200, allowedOrigin, allowedOrigins);
 }
 
 // ============== CLIENT HANDLERS ==============
-async function getClients(db, allowedOrigin, allowedOrigins) {
-  const { results } = await db.prepare(`
+async function getClients(url, db, allowedOrigin, allowedOrigins) {
+  const userId = url.searchParams.get('userId');
+  
+  let query = `
     SELECT id, name, email, phone, address, city, industry, status, 
            added_date as addedDate
-    FROM clients ORDER BY created_at DESC
-  `).all();
+    FROM clients`;
+  
+  if (userId) {
+    query += ` WHERE user_id = ?`;
+  }
+  
+  query += ` ORDER BY created_at DESC`;
+  
+  const { results } = userId 
+    ? await db.prepare(query).bind(userId).all()
+    : await db.prepare(query).all();
+  
   return jsonResponse(results, 200, allowedOrigin, allowedOrigins);
 }
 
@@ -291,8 +340,8 @@ async function createClient(request, db, allowedOrigin, allowedOrigins) {
   const id = generateId('CLI');
   
   await db.prepare(`
-    INSERT INTO clients (id, name, email, phone, address, city, industry, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO clients (id, name, email, phone, address, city, industry, status, user_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).bind(
     id,
     data.name,
@@ -301,7 +350,8 @@ async function createClient(request, db, allowedOrigin, allowedOrigins) {
     data.address || null,
     data.city || null,
     data.industry || null,
-    data.status || 'Active'
+    data.status || 'Active',
+    data.userId || null
   ).run();
   
   return jsonResponse({ id, ...data, message: 'Client created successfully' }, 201, allowedOrigin, allowedOrigins);
@@ -341,8 +391,10 @@ async function deleteClient(id, db, allowedOrigin, allowedOrigins) {
 }
 
 // ============== ASSIGNMENT HANDLERS ==============
-async function getAssignments(db, allowedOrigin, allowedOrigins) {
-  const { results } = await db.prepare(`
+async function getAssignments(url, db, allowedOrigin, allowedOrigins) {
+  const userId = url.searchParams.get('userId');
+  
+  let query = `
     SELECT 
       a.id, a.vehicle_id as vehicleId, a.client_id as clientId,
       a.assigned_date as assignedDate, a.start_date as startDate,
@@ -352,14 +404,25 @@ async function getAssignments(db, allowedOrigin, allowedOrigins) {
       c.name as clientName
     FROM assignments a
     LEFT JOIN vehicles v ON a.vehicle_id = v.id
-    LEFT JOIN clients c ON a.client_id = c.id
-    ORDER BY a.created_at DESC
-  `).all();
+    LEFT JOIN clients c ON a.client_id = c.id`;
+  
+  if (userId) {
+    query += ` WHERE a.user_id = ?`;
+  }
+  
+  query += ` ORDER BY a.created_at DESC`;
+  
+  const { results } = userId 
+    ? await db.prepare(query).bind(userId).all()
+    : await db.prepare(query).all();
+  
   return jsonResponse(results, 200, allowedOrigin, allowedOrigins);
 }
 
-async function getAssignment(id, db, allowedOrigin, allowedOrigins) {
-  const result = await db.prepare(`
+async function getAssignment(id, url, db, allowedOrigin, allowedOrigins) {
+  const userId = url.searchParams.get('userId');
+  
+  let query = `
     SELECT 
       a.id, a.vehicle_id as vehicleId, a.client_id as clientId,
       a.assigned_date as assignedDate, a.start_date as startDate,
@@ -370,8 +433,18 @@ async function getAssignment(id, db, allowedOrigin, allowedOrigins) {
     FROM assignments a
     LEFT JOIN vehicles v ON a.vehicle_id = v.id
     LEFT JOIN clients c ON a.client_id = c.id
-    WHERE a.id = ?
-  `).bind(id).first();
+    WHERE a.id = ?`;
+  
+  if (userId) {
+    query += ` AND a.user_id = ?`;
+  }
+  
+  let result;
+  if (userId) {
+    result = await db.prepare(query).bind(id, userId).first();
+  } else {
+    result = await db.prepare(query).bind(id).first();
+  }
   
   if (!result) return errorResponse('Assignment not found', 404, allowedOrigin, allowedOrigins);
   return jsonResponse(result, 200, allowedOrigin, allowedOrigins);
@@ -382,8 +455,8 @@ async function createAssignment(request, db, allowedOrigin, allowedOrigins) {
   const id = generateId('ASN');
   
   await db.prepare(`
-    INSERT INTO assignments (id, vehicle_id, client_id, start_date, end_date, purpose, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO assignments (id, vehicle_id, client_id, start_date, end_date, purpose, status, user_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `).bind(
     id,
     data.vehicleId,
@@ -391,7 +464,8 @@ async function createAssignment(request, db, allowedOrigin, allowedOrigins) {
     data.startDate || null,
     data.endDate || null,
     data.purpose || null,
-    data.status || 'Active'
+    data.status || 'Active',
+    data.userId || null
   ).run();
   
   // Update vehicle status to "On Rent"
@@ -550,36 +624,36 @@ async function getUsers(db, allowedOrigin, allowedOrigins) {
 
 async function loginUser(request, db, allowedOrigin, allowedOrigins) {
   const { email, password } = await request.json();
-  
-  // For demo purposes, accept any valid email format
-  // In production, you'd verify password_hash
-  const user = await db.prepare(`
-    SELECT id, name, email, role, avatar_url as avatarUrl
+  // Validate credentials against stored password_hash
+  if (!email || !password) {
+    return errorResponse('Email and password are required', 400, allowedOrigin, allowedOrigins);
+  }
+
+  const row = await db.prepare(`
+    SELECT id, name, email, role, avatar_url as avatarUrl, password_hash
     FROM users WHERE email = ?
   `).bind(email).first();
-  
-  if (!user) {
-    // Create user on first login (demo mode)
-    const id = generateId('USR');
-    const name = email.split('@')[0];
-    
-    await db.prepare(`
-      INSERT INTO users (id, name, email, role) VALUES (?, ?, ?, ?)
-    `).bind(id, name, email, 'User').run();
-    
-    return jsonResponse({
-      id,
-      name,
-      email,
-      role: 'User',
-      message: 'Login successful'
-    }, 200, allowedOrigin, allowedOrigins);
+
+  if (!row) {
+    return errorResponse('Invalid email or password', 401, allowedOrigin, allowedOrigins);
   }
-  
-  return jsonResponse({
-    ...user,
-    message: 'Login successful'
-  }, 200, allowedOrigin, allowedOrigins);
+
+  const providedHash = await hashPassword(password);
+  const storedHash = row.password_hash || '';
+
+  if (providedHash !== storedHash) {
+    return errorResponse('Invalid email or password', 401, allowedOrigin, allowedOrigins);
+  }
+
+  const user = {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    role: row.role,
+    avatarUrl: row.avatarUrl,
+  };
+
+  return jsonResponse({ ...user, message: 'Login successful' }, 200, allowedOrigin, allowedOrigins);
 }
 
 async function signupUser(request, db, allowedOrigin, allowedOrigins) {
@@ -601,9 +675,10 @@ async function signupUser(request, db, allowedOrigin, allowedOrigins) {
   // Create new user
   const id = generateId('USR');
   try {
+    const pwdHash = await hashPassword(password);
     await db.prepare(`
       INSERT INTO users (id, name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)
-    `).bind(id, name, email, password, 'User').run();
+    `).bind(id, name, email, pwdHash, 'User').run();
     
     return jsonResponse({
       id,

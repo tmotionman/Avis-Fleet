@@ -67,10 +67,11 @@ function App() {
       setIsLoading(true)
       setDataError(null)
       try {
+        const userId = currentUser?.id || currentUser?.email
         const [vehiclesData, clientsData, assignmentsData] = await Promise.all([
-          vehiclesApi.getAll(),
-          clientsApi.getAll(),
-          assignmentsApi.getAll()
+          vehiclesApi.getAll(userId),
+          clientsApi.getAll(userId),
+          assignmentsApi.getAll(userId)
         ])
         setVehicles(vehiclesData)
         setClients(clientsData)
@@ -86,15 +87,16 @@ function App() {
     if (isAuthenticated) {
       fetchData()
     }
-  }, [isAuthenticated, isTourMode])
+  }, [isAuthenticated, isTourMode, currentUser?.id, currentUser?.email])
 
   // Refresh data function
   const refreshData = async () => {
     try {
+      const userId = currentUser?.id || currentUser?.email
       const [vehiclesData, clientsData, assignmentsData] = await Promise.all([
-        vehiclesApi.getAll(),
-        clientsApi.getAll(),
-        assignmentsApi.getAll()
+        vehiclesApi.getAll(userId),
+        clientsApi.getAll(userId),
+        assignmentsApi.getAll(userId)
       ])
       setVehicles(vehiclesData)
       setClients(clientsData)
@@ -112,7 +114,8 @@ function App() {
   // Handler: Create vehicle
   const handleCreateVehicle = async (vehicleData) => {
     try {
-      const result = await vehiclesApi.create(vehicleData)
+      const userId = currentUser?.id || currentUser?.email
+      const result = await vehiclesApi.create(vehicleData, userId)
       await refreshData()
       return result
     } catch (error) {
@@ -124,7 +127,8 @@ function App() {
   // Handler: Update vehicle
   const handleUpdateVehicle = async (id, vehicleData) => {
     try {
-      const result = await vehiclesApi.update(id, vehicleData)
+      const userId = currentUser?.id || currentUser?.email
+      const result = await vehiclesApi.update(id, vehicleData, userId)
       await refreshData()
       return result
     } catch (error) {
@@ -136,7 +140,8 @@ function App() {
   // Handler: Delete vehicle
   const handleDeleteVehicle = async (id) => {
     try {
-      await vehiclesApi.delete(id)
+      const userId = currentUser?.id || currentUser?.email
+      await vehiclesApi.delete(id, userId)
       await refreshData()
     } catch (error) {
       console.error('Error deleting vehicle:', error)
@@ -147,7 +152,8 @@ function App() {
   // Handler: Assign vehicle to client (changes status to "On Rent")
   const handleAssignVehicle = async (assignment) => {
     try {
-      await assignmentsApi.create(assignment)
+      const userId = currentUser?.id || currentUser?.email
+      await assignmentsApi.create(assignment, userId)
       await refreshData()
     } catch (error) {
       console.error('Error creating assignment:', error)
@@ -158,10 +164,11 @@ function App() {
   // Handler: Return vehicle (changes status back to "Available")
   const handleReturnVehicle = async (assignmentId) => {
     try {
+      const userId = currentUser?.id || currentUser?.email
       await assignmentsApi.update(assignmentId, { 
         status: 'Completed',
         returnDate: new Date().toISOString().split('T')[0]
-      })
+      }, userId)
       await refreshData()
     } catch (error) {
       console.error('Error returning vehicle:', error)
@@ -172,7 +179,8 @@ function App() {
   // Handler: Update assignment details
   const handleUpdateAssignment = async (assignmentId, updates) => {
     try {
-      await assignmentsApi.update(assignmentId, updates)
+      const userId = currentUser?.id || currentUser?.email
+      await assignmentsApi.update(assignmentId, updates, userId)
       await refreshData()
     } catch (error) {
       console.error('Error updating assignment:', error)
@@ -183,7 +191,8 @@ function App() {
   // Handler: Delete assignment
   const handleDeleteAssignment = async (assignmentId) => {
     try {
-      await assignmentsApi.delete(assignmentId)
+      const userId = currentUser?.id || currentUser?.email
+      await assignmentsApi.delete(assignmentId, userId)
       await refreshData()
     } catch (error) {
       console.error('Error deleting assignment:', error)
@@ -194,9 +203,9 @@ function App() {
   const handleLogin = (userData) => {
     setCurrentUser(userData)
     setIsAuthenticated(true)
-    // FOR TESTING: Show tour on every login
-    setIsTourMode(true)
-    setShowTour(true)
+    // Existing users skip tour - load real data
+    setIsTourMode(false)
+    setShowTour(false)
     try {
       localStorage.setItem('avis_isAuthenticated', 'true')
       localStorage.setItem('avis_currentUser', JSON.stringify(userData))
@@ -214,6 +223,8 @@ function App() {
     try {
       localStorage.setItem('avis_isAuthenticated', 'true')
       localStorage.setItem('avis_currentUser', JSON.stringify(userData))
+      // Mark as new user who needs tour
+      localStorage.setItem(`avis_is_new_user_${userData?.id || userData?.email}`, 'true')
     } catch (e) {
       // ignore storage errors
     }
@@ -222,28 +233,35 @@ function App() {
   const handleTourComplete = async () => {
     setShowTour(false)
     setIsTourMode(false)
-    // After tour completes, show empty data (real database data)
+    // After tour completes, reset to empty/real database data
+    // Clear dummy data and fetch real (likely empty) data from D1
+    setVehicles([])
+    setClients([])
+    setAssignments([])
     setIsLoading(true)
     try {
+      const userId = currentUser?.id || currentUser?.email
       const [vehiclesData, clientsData, assignmentsData] = await Promise.all([
-        vehiclesApi.getAll(),
-        clientsApi.getAll(),
-        assignmentsApi.getAll()
+        vehiclesApi.getAll(userId),
+        clientsApi.getAll(userId),
+        assignmentsApi.getAll(userId)
       ])
       setVehicles(vehiclesData)
       setClients(clientsData)
       setAssignments(assignmentsData)
     } catch (error) {
-      // If error, just clear the dummy data
+      console.log('Starting fresh - no existing data in database')
+      // If error or no data, start with empty arrays (fresh start for new user)
       setVehicles([])
       setClients([])
       setAssignments([])
     } finally {
       setIsLoading(false)
     }
-    // Mark tour as completed for this user
+    // Mark tour as completed and user is no longer new
     try {
-      localStorage.setItem(`avis_tour_completed_${currentUser?.id}`, 'true')
+      localStorage.setItem(`avis_tour_completed_${currentUser?.id || currentUser?.email}`, 'true')
+      localStorage.removeItem(`avis_is_new_user_${currentUser?.id || currentUser?.email}`)
     } catch (e) {
       // ignore
     }

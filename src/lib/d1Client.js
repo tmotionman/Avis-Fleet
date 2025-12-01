@@ -32,65 +32,77 @@ async function apiFetch(endpoint, options = {}) {
 
 // ============== VEHICLES ==============
 export const vehiclesApi = {
-  getAll: () => apiFetch('/api/vehicles'),
+  getAll: (userId) => userId 
+    ? apiFetch(`/api/vehicles?userId=${userId}`)
+    : apiFetch('/api/vehicles'),
   
-  getById: (id) => apiFetch(`/api/vehicles/${id}`),
+  getById: (id, userId) => userId
+    ? apiFetch(`/api/vehicles/${id}?userId=${userId}`)
+    : apiFetch(`/api/vehicles/${id}`),
   
-  create: (data) => apiFetch('/api/vehicles', {
+  create: (data, userId) => apiFetch('/api/vehicles', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, userId }),
   }),
   
-  update: (id, data) => apiFetch(`/api/vehicles/${id}`, {
+  update: (id, data, userId) => apiFetch(`/api/vehicles/${id}`, {
     method: 'PUT',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, userId }),
   }),
   
-  delete: (id) => apiFetch(`/api/vehicles/${id}`, {
-    method: 'DELETE',
-  }),
+  delete: (id, userId) => userId
+    ? apiFetch(`/api/vehicles/${id}?userId=${userId}`, { method: 'DELETE' })
+    : apiFetch(`/api/vehicles/${id}`, { method: 'DELETE' }),
 };
 
 // ============== CLIENTS ==============
 export const clientsApi = {
-  getAll: () => apiFetch('/api/clients'),
+  getAll: (userId) => userId
+    ? apiFetch(`/api/clients?userId=${userId}`)
+    : apiFetch('/api/clients'),
   
-  getById: (id) => apiFetch(`/api/clients/${id}`),
+  getById: (id, userId) => userId
+    ? apiFetch(`/api/clients/${id}?userId=${userId}`)
+    : apiFetch(`/api/clients/${id}`),
   
-  create: (data) => apiFetch('/api/clients', {
+  create: (data, userId) => apiFetch('/api/clients', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, userId }),
   }),
   
-  update: (id, data) => apiFetch(`/api/clients/${id}`, {
+  update: (id, data, userId) => apiFetch(`/api/clients/${id}`, {
     method: 'PUT',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, userId }),
   }),
   
-  delete: (id) => apiFetch(`/api/clients/${id}`, {
-    method: 'DELETE',
-  }),
+  delete: (id, userId) => userId
+    ? apiFetch(`/api/clients/${id}?userId=${userId}`, { method: 'DELETE' })
+    : apiFetch(`/api/clients/${id}`, { method: 'DELETE' }),
 };
 
 // ============== ASSIGNMENTS ==============
 export const assignmentsApi = {
-  getAll: () => apiFetch('/api/assignments'),
+  getAll: (userId) => userId
+    ? apiFetch(`/api/assignments?userId=${userId}`)
+    : apiFetch('/api/assignments'),
   
-  getById: (id) => apiFetch(`/api/assignments/${id}`),
+  getById: (id, userId) => userId
+    ? apiFetch(`/api/assignments/${id}?userId=${userId}`)
+    : apiFetch(`/api/assignments/${id}`),
   
-  create: (data) => apiFetch('/api/assignments', {
+  create: (data, userId) => apiFetch('/api/assignments', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, userId }),
   }),
   
-  update: (id, data) => apiFetch(`/api/assignments/${id}`, {
+  update: (id, data, userId) => apiFetch(`/api/assignments/${id}`, {
     method: 'PUT',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, userId }),
   }),
   
-  delete: (id) => apiFetch(`/api/assignments/${id}`, {
-    method: 'DELETE',
-  }),
+  delete: (id, userId) => userId
+    ? apiFetch(`/api/assignments/${id}?userId=${userId}`, { method: 'DELETE' })
+    : apiFetch(`/api/assignments/${id}`, { method: 'DELETE' }),
 };
 
 // ============== MAINTENANCE ==============

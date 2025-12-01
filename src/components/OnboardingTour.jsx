@@ -94,6 +94,10 @@ const OnboardingTour = ({ isOpen, onClose, onNavigate }) => {
   }
 
   const handleSkip = () => {
+    // Navigate to dashboard when skipping tour
+    if (onNavigate) {
+      onNavigate('dashboard')
+    }
     onClose()
   }
 
