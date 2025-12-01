@@ -14,7 +14,8 @@ const Login = ({ onLogin }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [showSignUp, setShowSignUp] = useState(false)
+  const [showTerms, setShowTerms] = useState(false)
+  const [showPrivacy, setShowPrivacy] = useState(false)
 
   const handleLogin = (e) => {
     e.preventDefault()
@@ -234,102 +235,137 @@ const Login = ({ onLogin }) => {
               </motion.button>
             </form>
 
-            {/* Divider */}
-            <div className="my-6 flex items-center gap-4">
-              <div className="flex-1 h-px bg-gray-200"></div>
-              <span className="text-gray-500 text-sm">New to Avis Fleet?</span>
-              <div className="flex-1 h-px bg-gray-200"></div>
-            </div>
-
-            {/* Sign Up Button */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setShowSignUp(true)}
-              className="w-full py-3 border-2 border-avis-red text-avis-red font-bold rounded-lg hover:bg-red-50 transition-all duration-200"
-            >
-              Create Account
-            </motion.button>
-
-            {/* Demo Credentials */}
-            <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-xs text-gray-600 font-medium mb-3">DEMO CREDENTIALS</p>
-              <div className="space-y-2 text-sm text-gray-700">
-                <p>Email: <span className="font-mono font-semibold">admin@avisfleet.com</span></p>
-                <p>Password: <span className="font-mono font-semibold">password123</span></p>
-              </div>
+            {/* Terms of Service and Privacy Policy */}
+            <div className="mt-6 text-center">
+              <p className="text-xs text-gray-500">
+                By signing in, you agree to our{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowTerms(true)}
+                  className="text-avis-red hover:text-red-700 font-medium underline"
+                >
+                  Terms of Service
+                </button>{' '}
+                and{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowPrivacy(true)}
+                  className="text-avis-red hover:text-red-700 font-medium underline"
+                >
+                  Privacy Policy
+                </button>
+              </p>
             </div>
         </motion.div>
       </motion.div>
 
-      {/* Sign Up Modal */}
-      {showSignUp && (
+      {/* Terms of Service Modal */}
+      {showTerms && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          onClick={() => setShowSignUp(false)}
+          onClick={() => setShowTerms(false)}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full"
+            className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
           >
-            <h2 className="text-2xl font-bold text-avis-black mb-6">Create Account</h2>
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                <input
-                  type="text"
-                  placeholder="John Doe"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avis-red focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                <input
-                  type="email"
-                  placeholder="john@company.com"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avis-red focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                <input
-                  type="password"
-                  placeholder="At least 8 characters"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avis-red focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="flex items-center gap-2 text-sm text-gray-700">
-                  <input type="checkbox" className="w-4 h-4 rounded border-gray-300" />
-                  I agree to the Terms of Service
-                </label>
-              </div>
+            <h2 className="text-2xl font-bold text-avis-black mb-6">Terms of Service</h2>
+            <div className="prose prose-sm text-gray-700 space-y-4">
+              <p className="text-sm"><strong>Last Updated:</strong> December 1, 2025</p>
+              
+              <h3 className="text-lg font-semibold text-avis-black mt-4">1. Acceptance of Terms</h3>
+              <p className="text-sm">By accessing and using the Avis Fleet Management System, you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.</p>
+              
+              <h3 className="text-lg font-semibold text-avis-black mt-4">2. Use of Service</h3>
+              <p className="text-sm">The Avis Fleet Management System is provided for authorized business use only. You agree to use the system in compliance with all applicable laws and regulations, and in accordance with Avis company policies.</p>
+              
+              <h3 className="text-lg font-semibold text-avis-black mt-4">3. User Accounts</h3>
+              <p className="text-sm">You are responsible for maintaining the confidentiality of your account credentials. You agree to notify us immediately of any unauthorized use of your account.</p>
+              
+              <h3 className="text-lg font-semibold text-avis-black mt-4">4. Data Accuracy</h3>
+              <p className="text-sm">You agree to provide accurate and complete information when using the system. Avis reserves the right to suspend accounts that contain false or misleading information.</p>
+              
+              <h3 className="text-lg font-semibold text-avis-black mt-4">5. Intellectual Property</h3>
+              <p className="text-sm">All content, features, and functionality of the Avis Fleet Management System are owned by Avis and are protected by international copyright, trademark, and other intellectual property laws.</p>
+              
+              <h3 className="text-lg font-semibold text-avis-black mt-4">6. Limitation of Liability</h3>
+              <p className="text-sm">Avis shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the service.</p>
+              
+              <h3 className="text-lg font-semibold text-avis-black mt-4">7. Changes to Terms</h3>
+              <p className="text-sm">Avis reserves the right to modify these terms at any time. Continued use of the service after changes constitutes acceptance of the new terms.</p>
             </div>
-            <div className="flex gap-3">
+            <div className="mt-6 flex justify-end">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setShowSignUp(false)}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200"
+                onClick={() => setShowTerms(false)}
+                className="px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
               >
-                Cancel
+                Close
               </motion.button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* Privacy Policy Modal */}
+      {showPrivacy && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowPrivacy(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+          >
+            <h2 className="text-2xl font-bold text-avis-black mb-6">Privacy Policy</h2>
+            <div className="prose prose-sm text-gray-700 space-y-4">
+              <p className="text-sm"><strong>Last Updated:</strong> December 1, 2025</p>
+              
+              <h3 className="text-lg font-semibold text-avis-black mt-4">1. Information We Collect</h3>
+              <p className="text-sm">We collect information you provide directly to us, including name, email address, and other contact information necessary for fleet management operations.</p>
+              
+              <h3 className="text-lg font-semibold text-avis-black mt-4">2. How We Use Your Information</h3>
+              <p className="text-sm">We use the information we collect to provide, maintain, and improve our fleet management services, process transactions, and communicate with you about your account.</p>
+              
+              <h3 className="text-lg font-semibold text-avis-black mt-4">3. Information Sharing</h3>
+              <p className="text-sm">We do not sell or share your personal information with third parties except as necessary to provide our services, comply with legal obligations, or protect our rights.</p>
+              
+              <h3 className="text-lg font-semibold text-avis-black mt-4">4. Data Security</h3>
+              <p className="text-sm">We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p>
+              
+              <h3 className="text-lg font-semibold text-avis-black mt-4">5. Data Retention</h3>
+              <p className="text-sm">We retain your personal information for as long as necessary to fulfill the purposes for which it was collected, including to satisfy legal, accounting, or reporting requirements.</p>
+              
+              <h3 className="text-lg font-semibold text-avis-black mt-4">6. Your Rights</h3>
+              <p className="text-sm">You have the right to access, correct, or delete your personal information. You may also request a copy of your data or object to certain processing activities.</p>
+              
+              <h3 className="text-lg font-semibold text-avis-black mt-4">7. Cookies and Tracking</h3>
+              <p className="text-sm">We use cookies and similar technologies to enhance your experience, analyze usage patterns, and improve our services.</p>
+              
+              <h3 className="text-lg font-semibold text-avis-black mt-4">8. Contact Us</h3>
+              <p className="text-sm">If you have questions about this Privacy Policy, please contact us at privacy@avisfleet.com.</p>
+            </div>
+            <div className="mt-6 flex justify-end">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => {
-                  setShowSignUp(false)
-                  alert('Sign up feature coming soon!')
-                }}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                onClick={() => setShowPrivacy(false)}
+                className="px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
               >
-                Create Account
+                Close
               </motion.button>
             </div>
           </motion.div>
