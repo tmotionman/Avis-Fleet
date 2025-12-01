@@ -124,7 +124,7 @@ export default {
       }
       if (path.match(/^\/api\/clients\/[\w-]+$/) && method === 'DELETE') {
         const id = path.split('/').pop();
-        return await deleteClient(id, env.DB, allowedOrigin, allowedOrigins);
+        return await deleteClient(id, url, env.DB, allowedOrigin, allowedOrigins);
       }
 
       // ============== ASSIGNMENTS ==============
@@ -144,7 +144,7 @@ export default {
       }
       if (path.match(/^\/api\/assignments\/[\w-]+$/) && method === 'DELETE') {
         const id = path.split('/').pop();
-        return await deleteAssignment(id, env.DB, allowedOrigin, allowedOrigins);
+        return await deleteAssignment(id, url, env.DB, allowedOrigin, allowedOrigins);
       }
 
       // ============== MAINTENANCE ==============
@@ -263,8 +263,9 @@ async function createVehicle(request, db, allowedOrigin, allowedOrigins) {
 
 async function updateVehicle(id, request, db, allowedOrigin, allowedOrigins) {
   const data = await request.json();
+  const userId = data.userId;
   
-  await db.prepare(`
+  let query = `
     UPDATE vehicles SET
       registration_no = COALESCE(?, registration_no),
       model = COALESCE(?, model),
@@ -275,18 +276,38 @@ async function updateVehicle(id, request, db, allowedOrigin, allowedOrigins) {
       location = COALESCE(?, location),
       assigned_to = COALESCE(?, assigned_to),
       updated_at = datetime('now')
-    WHERE id = ?
-  `).bind(
-    data.registrationNo || null,
-    data.model || null,
-    data.year || null,
-    data.mileage || null,
-    data.status || null,
-    data.lastServiceDate || null,
-    data.location || null,
-    data.assignedTo || null,
-    id
-  ).run();
+    WHERE id = ?`;
+  
+  if (userId) {
+    query += ` AND user_id = ?`;
+  }
+  
+  if (userId) {
+    await db.prepare(query).bind(
+      data.registrationNo || null,
+      data.model || null,
+      data.year || null,
+      data.mileage || null,
+      data.status || null,
+      data.lastServiceDate || null,
+      data.location || null,
+      data.assignedTo || null,
+      id,
+      userId
+    ).run();
+  } else {
+    await db.prepare(query).bind(
+      data.registrationNo || null,
+      data.model || null,
+      data.year || null,
+      data.mileage || null,
+      data.status || null,
+      data.lastServiceDate || null,
+      data.location || null,
+      data.assignedTo || null,
+      id
+    ).run();
+  }
   
   return jsonResponse({ id, message: 'Vehicle updated successfully' }, 200, allowedOrigin, allowedOrigins);
 }
@@ -359,8 +380,9 @@ async function createClient(request, db, allowedOrigin, allowedOrigins) {
 
 async function updateClient(id, request, db, allowedOrigin, allowedOrigins) {
   const data = await request.json();
+  const userId = data.userId;
   
-  await db.prepare(`
+  let query = `
     UPDATE clients SET
       name = COALESCE(?, name),
       email = COALESCE(?, email),
@@ -370,23 +392,48 @@ async function updateClient(id, request, db, allowedOrigin, allowedOrigins) {
       industry = COALESCE(?, industry),
       status = COALESCE(?, status),
       updated_at = datetime('now')
-    WHERE id = ?
-  `).bind(
-    data.name || null,
-    data.email || null,
-    data.phone || null,
-    data.address || null,
-    data.city || null,
-    data.industry || null,
-    data.status || null,
-    id
-  ).run();
+    WHERE id = ?`;
+  
+  if (userId) {
+    query += ` AND user_id = ?`;
+  }
+  
+  if (userId) {
+    await db.prepare(query).bind(
+      data.name || null,
+      data.email || null,
+      data.phone || null,
+      data.address || null,
+      data.city || null,
+      data.industry || null,
+      data.status || null,
+      id,
+      userId
+    ).run();
+  } else {
+    await db.prepare(query).bind(
+      data.name || null,
+      data.email || null,
+      data.phone || null,
+      data.address || null,
+      data.city || null,
+      data.industry || null,
+      data.status || null,
+      id
+    ).run();
+  }
   
   return jsonResponse({ id, message: 'Client updated successfully' }, 200, allowedOrigin, allowedOrigins);
 }
 
-async function deleteClient(id, db, allowedOrigin, allowedOrigins) {
-  await db.prepare('DELETE FROM clients WHERE id = ?').bind(id).run();
+async function deleteClient(id, url, db, allowedOrigin, allowedOrigins) {
+  const userId = url.searchParams.get('userId');
+  
+  if (userId) {
+    await db.prepare('DELETE FROM clients WHERE id = ? AND user_id = ?').bind(id, userId).run();
+  } else {
+    await db.prepare('DELETE FROM clients WHERE id = ?').bind(id).run();
+  }
   return jsonResponse({ message: 'Client deleted successfully' }, 200, allowedOrigin, allowedOrigins);
 }
 
@@ -478,8 +525,9 @@ async function createAssignment(request, db, allowedOrigin, allowedOrigins) {
 
 async function updateAssignment(id, request, db, allowedOrigin, allowedOrigins) {
   const data = await request.json();
+  const userId = data.userId;
   
-  await db.prepare(`
+  let query = `
     UPDATE assignments SET
       vehicle_id = COALESCE(?, vehicle_id),
       client_id = COALESCE(?, client_id),
@@ -489,17 +537,36 @@ async function updateAssignment(id, request, db, allowedOrigin, allowedOrigins) 
       purpose = COALESCE(?, purpose),
       status = COALESCE(?, status),
       updated_at = datetime('now')
-    WHERE id = ?
-  `).bind(
-    data.vehicleId || null,
-    data.clientId || null,
-    data.startDate || null,
-    data.endDate || null,
-    data.returnDate || null,
-    data.purpose || null,
-    data.status || null,
-    id
-  ).run();
+    WHERE id = ?`;
+  
+  if (userId) {
+    query += ` AND user_id = ?`;
+  }
+  
+  if (userId) {
+    await db.prepare(query).bind(
+      data.vehicleId || null,
+      data.clientId || null,
+      data.startDate || null,
+      data.endDate || null,
+      data.returnDate || null,
+      data.purpose || null,
+      data.status || null,
+      id,
+      userId
+    ).run();
+  } else {
+    await db.prepare(query).bind(
+      data.vehicleId || null,
+      data.clientId || null,
+      data.startDate || null,
+      data.endDate || null,
+      data.returnDate || null,
+      data.purpose || null,
+      data.status || null,
+      id
+    ).run();
+  }
   
   // If assignment is completed, update vehicle status
   if (data.status === 'Completed' && data.vehicleId) {
@@ -509,11 +576,22 @@ async function updateAssignment(id, request, db, allowedOrigin, allowedOrigins) 
   return jsonResponse({ id, message: 'Assignment updated successfully' }, 200, allowedOrigin, allowedOrigins);
 }
 
-async function deleteAssignment(id, db, allowedOrigin, allowedOrigins) {
-  // Get vehicle ID before deleting
-  const assignment = await db.prepare('SELECT vehicle_id FROM assignments WHERE id = ?').bind(id).first();
+async function deleteAssignment(id, url, db, allowedOrigin, allowedOrigins) {
+  const userId = url.searchParams.get('userId');
   
-  await db.prepare('DELETE FROM assignments WHERE id = ?').bind(id).run();
+  // Get vehicle ID before deleting
+  let assignment;
+  if (userId) {
+    assignment = await db.prepare('SELECT vehicle_id FROM assignments WHERE id = ? AND user_id = ?').bind(id, userId).first();
+  } else {
+    assignment = await db.prepare('SELECT vehicle_id FROM assignments WHERE id = ?').bind(id).first();
+  }
+  
+  if (userId) {
+    await db.prepare('DELETE FROM assignments WHERE id = ? AND user_id = ?').bind(id, userId).run();
+  } else {
+    await db.prepare('DELETE FROM assignments WHERE id = ?').bind(id).run();
+  }
   
   // Update vehicle status back to Available
   if (assignment?.vehicle_id) {

@@ -6,7 +6,7 @@ import KPICard from '../components/KPICard'
 import CustomSelect from '../components/CustomSelect'
 import { clientsApi } from '../lib/d1Client'
 
-const Clients = ({ clients: initialClients = [], refreshData }) => {
+const Clients = ({ clients: initialClients = [], refreshData, currentUser }) => {
   // Use clients from props (from D1 database)
   const clients = initialClients
 
@@ -72,10 +72,11 @@ const Clients = ({ clients: initialClients = [], refreshData }) => {
     }
 
     try {
+      const userId = currentUser?.id || currentUser?.email
       if (editingClient) {
-        await clientsApi.update(editingClient.id, formData)
+        await clientsApi.update(editingClient.id, formData, userId)
       } else {
-        await clientsApi.create(formData)
+        await clientsApi.create(formData, userId)
       }
       // Refresh data from server
       if (refreshData) {
@@ -92,7 +93,8 @@ const Clients = ({ clients: initialClients = [], refreshData }) => {
     e.stopPropagation()
     if (window.confirm('Are you sure you want to delete this client?')) {
       try {
-        await clientsApi.delete(id)
+        const userId = currentUser?.id || currentUser?.email
+        await clientsApi.delete(id, userId)
         // Refresh data from server
         if (refreshData) {
           await refreshData()

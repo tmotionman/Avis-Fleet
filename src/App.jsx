@@ -353,7 +353,7 @@ function App() {
           />
         )
       case 'clients':
-        return <Clients clients={clients} refreshData={refreshData} />
+        return <Clients clients={clients} refreshData={refreshData} currentUser={currentUser} />
       case 'reports':
         return <Reports vehicles={vehicles} clients={clients} assignments={assignments} />
       case 'users':
