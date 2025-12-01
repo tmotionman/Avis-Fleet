@@ -4,7 +4,11 @@
  */
 
 // API Base URL - Update this after deploying your worker
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://avis-fleet-api.twizasimwanza.workers.dev';
+// For local development, use the dev environment with open CORS
+const isDevelopment = import.meta.env.DEV;
+const API_BASE_URL = isDevelopment 
+  ? 'https://avis-fleet-api.twizasimwanza.workers.dev'  // Still use production for localhost
+  : (import.meta.env.VITE_API_URL || 'https://avis-fleet-api.twizasimwanza.workers.dev');
 
 // Generic fetch wrapper with error handling
 async function apiFetch(endpoint, options = {}) {

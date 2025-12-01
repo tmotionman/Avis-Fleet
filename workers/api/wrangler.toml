@@ -12,11 +12,17 @@ database_id = "419bed2e-153e-45f6-bd7b-8a815a772a7f"
 # Environment variables
 [vars]
 ENVIRONMENT = "production"
-CORS_ORIGIN = "https://avis-fleet.pages.dev"  # Update with your Pages URL
+CORS_ORIGIN = "https://avis-fleet.pages.dev"
 
 # Development settings
 [env.dev]
 name = "avis-fleet-api-dev"
+
+[[env.dev.d1_databases]]
+binding = "DB"
+database_name = "avis-fleet-db"
+database_id = "419bed2e-153e-45f6-bd7b-8a815a772a7f"
+
 [env.dev.vars]
 ENVIRONMENT = "development"
 CORS_ORIGIN = "*"
