@@ -650,7 +650,11 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
             className="relative p-2 text-gray-600 hover:text-avis-red hover:bg-gray-100 rounded-lg transition-all"
           >
             <Bell size={20} />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-avis-red rounded-full"></span>
+            {notifications.length > 0 && (
+              <span className="absolute top-0 right-0 w-5 h-5 bg-avis-red text-white text-xs font-bold rounded-full flex items-center justify-center">
+                {notifications.length > 9 ? '9+' : notifications.length}
+              </span>
+            )}
           </button>
 
           {/* Notifications Dropdown */}
