@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react'
 import { Menu, Search, Bell, User, LogOut, Settings, ChevronDown, Upload, X } from 'lucide-react'
 import { motion } from 'framer-motion'
-import AvisLogoWebp from '../../assets/Avis.webp'
+import AvisLogoWebp from '../assets/Avis.webp'
 import CustomSelect from './CustomSelect'
 
 const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
