@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import Sidebar from './components/Sidebar'
 import Topbar from './components/Topbar'
+import OnboardingTour from './components/OnboardingTour'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import FleetList from './pages/FleetList'
@@ -293,8 +294,8 @@ function App() {
         setSidebarOpen={setSidebarOpen}
       />
 
-  {/* Main Content with left margin for always-expanded sidebar */}
-  <div className="flex flex-col min-h-screen justify-start pt-16 lg:ml-64">
+      {/* Main Content with left margin for always-expanded sidebar */}
+      <div className="flex flex-col min-h-screen justify-start pt-16 lg:ml-64">
         {/* Topbar */}
         <Topbar currentUser={currentUser} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} onLogout={handleLogout} />
 
@@ -303,6 +304,12 @@ function App() {
           {renderPage()}
         </main>
       </div>
+
+      {/* Onboarding Tour for new users */}
+      <OnboardingTour 
+        userId={currentUser?.id} 
+        onNavigate={setCurrentPage} 
+      />
     </div>
   )
 }
