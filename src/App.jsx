@@ -10,7 +10,7 @@ import Clients from './pages/Clients'
 import Reports from './pages/Reports'
 import UserManagement from './pages/UserManagement'
 import Help from './pages/Help'
-import vehiclesData from './data/vehicles.json'
+import { vehiclesApi, clientsApi, assignmentsApi } from './lib/d1Client'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -33,98 +33,147 @@ function App() {
     }
   })
 
-  // Centralized vehicle state - persisted to localStorage
-  const [vehicles, setVehicles] = useState(() => {
-    try {
-      const saved = localStorage.getItem('avis_vehicles')
-      if (saved) {
-        const parsed = JSON.parse(saved)
-        // Migration: Update old statuses to new ones
-        return parsed.map(v => ({
-          ...v,
-          status: v.status === 'Active' ? 'Available' : 
-                 v.status === 'In Service' ? 'On Rent' : 
-                 v.status === 'Retired' ? 'Maintenance' : v.status
-        }))
+  // Loading state for data fetching
+  const [isLoading, setIsLoading] = useState(true)
+  const [dataError, setDataError] = useState(null)
+
+  // Centralized vehicle state - fetched from D1 database
+  const [vehicles, setVehicles] = useState([])
+
+  // Centralized clients state - fetched from D1 database
+  const [clients, setClients] = useState([])
+
+  // Centralized assignments state - fetched from D1 database
+  const [assignments, setAssignments] = useState([])
+
+  // Fetch all data from D1 database on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true)
+      setDataError(null)
+      try {
+        const [vehiclesData, clientsData, assignmentsData] = await Promise.all([
+          vehiclesApi.getAll(),
+          clientsApi.getAll(),
+          assignmentsApi.getAll()
+        ])
+        setVehicles(vehiclesData)
+        setClients(clientsData)
+        setAssignments(assignmentsData)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+        setDataError(error.message)
+      } finally {
+        setIsLoading(false)
       }
-      // Clear old localStorage data on first load with new data
-      localStorage.removeItem('avis_vehicles')
-      return vehiclesData
-    } catch (e) {
-      localStorage.removeItem('avis_vehicles')
-      return vehiclesData
     }
-  })
 
-  // Centralized assignments state - persisted to localStorage
-  const [assignments, setAssignments] = useState(() => {
-    try {
-      const saved = localStorage.getItem('avis_assignments')
-      return saved ? JSON.parse(saved) : []
-    } catch (e) {
-      return []
+    if (isAuthenticated) {
+      fetchData()
     }
-  })
+  }, [isAuthenticated])
 
-  // Persist vehicles to localStorage whenever they change
-  useEffect(() => {
+  // Refresh data function
+  const refreshData = async () => {
     try {
-      localStorage.setItem('avis_vehicles', JSON.stringify(vehicles))
-    } catch (e) {
-      // ignore storage errors
+      const [vehiclesData, clientsData, assignmentsData] = await Promise.all([
+        vehiclesApi.getAll(),
+        clientsApi.getAll(),
+        assignmentsApi.getAll()
+      ])
+      setVehicles(vehiclesData)
+      setClients(clientsData)
+      setAssignments(assignmentsData)
+    } catch (error) {
+      console.error('Error refreshing data:', error)
     }
-  }, [vehicles])
+  }
 
-  // Persist assignments to localStorage whenever they change
-  useEffect(() => {
+  // Handler: Update vehicles (for FleetList)
+  const handleUpdateVehicles = async (newVehicles) => {
+    setVehicles(newVehicles)
+  }
+
+  // Handler: Create vehicle
+  const handleCreateVehicle = async (vehicleData) => {
     try {
-      localStorage.setItem('avis_assignments', JSON.stringify(assignments))
-    } catch (e) {
-      // ignore storage errors
+      const result = await vehiclesApi.create(vehicleData)
+      await refreshData()
+      return result
+    } catch (error) {
+      console.error('Error creating vehicle:', error)
+      throw error
     }
-  }, [assignments])
+  }
+
+  // Handler: Update vehicle
+  const handleUpdateVehicle = async (id, vehicleData) => {
+    try {
+      const result = await vehiclesApi.update(id, vehicleData)
+      await refreshData()
+      return result
+    } catch (error) {
+      console.error('Error updating vehicle:', error)
+      throw error
+    }
+  }
+
+  // Handler: Delete vehicle
+  const handleDeleteVehicle = async (id) => {
+    try {
+      await vehiclesApi.delete(id)
+      await refreshData()
+    } catch (error) {
+      console.error('Error deleting vehicle:', error)
+      throw error
+    }
+  }
 
   // Handler: Assign vehicle to client (changes status to "On Rent")
-  const handleAssignVehicle = (assignment) => {
-    // Update vehicle status to "On Rent"
-    setVehicles(prev => prev.map(v => 
-      v.id === assignment.vehicleId 
-        ? { ...v, status: 'On Rent', assignedTo: assignment.clientName || 'Assigned' }
-        : v
-    ))
-    // Add assignment
-    setAssignments(prev => [...prev, assignment])
+  const handleAssignVehicle = async (assignment) => {
+    try {
+      await assignmentsApi.create(assignment)
+      await refreshData()
+    } catch (error) {
+      console.error('Error creating assignment:', error)
+      throw error
+    }
   }
 
   // Handler: Return vehicle (changes status back to "Available")
-  const handleReturnVehicle = (assignmentId) => {
-    const assignment = assignments.find(a => a.id === assignmentId)
-    if (assignment) {
-      // Update vehicle status back to "Available"
-      setVehicles(prev => prev.map(v => 
-        v.id === assignment.vehicleId 
-          ? { ...v, status: 'Available', assignedTo: 'Unassigned' }
-          : v
-      ))
-      // Mark assignment as returned
-      setAssignments(prev => prev.map(a =>
-        a.id === assignmentId
-          ? { ...a, returnDate: new Date().toISOString().split('T')[0] }
-          : a
-      ))
+  const handleReturnVehicle = async (assignmentId) => {
+    try {
+      await assignmentsApi.update(assignmentId, { 
+        status: 'Completed',
+        returnDate: new Date().toISOString().split('T')[0]
+      })
+      await refreshData()
+    } catch (error) {
+      console.error('Error returning vehicle:', error)
+      throw error
     }
   }
 
   // Handler: Update assignment details
-  const handleUpdateAssignment = (assignmentId, updates) => {
-    setAssignments(prev => prev.map(a =>
-      a.id === assignmentId ? { ...a, ...updates } : a
-    ))
+  const handleUpdateAssignment = async (assignmentId, updates) => {
+    try {
+      await assignmentsApi.update(assignmentId, updates)
+      await refreshData()
+    } catch (error) {
+      console.error('Error updating assignment:', error)
+      throw error
+    }
   }
 
   // Handler: Delete assignment
-  const handleDeleteAssignment = (assignmentId) => {
-    setAssignments(prev => prev.filter(a => a.id !== assignmentId))
+  const handleDeleteAssignment = async (assignmentId) => {
+    try {
+      await assignmentsApi.delete(assignmentId)
+      await refreshData()
+    } catch (error) {
+      console.error('Error deleting assignment:', error)
+      throw error
+    }
   }
 
   const handleLogin = (userData) => {
@@ -155,6 +204,40 @@ function App() {
     return <Login onLogin={handleLogin} />
   }
 
+  // Show loading screen while fetching data
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-avis-red border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Loading fleet data...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error screen if data fetch failed
+  if (dataError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <X className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Connection Error</h2>
+          <p className="text-gray-600 mb-4">Unable to connect to the database. Please check your connection and try again.</p>
+          <p className="text-sm text-gray-500 mb-4">{dataError}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-avis-red text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard':
@@ -166,11 +249,20 @@ function App() {
           />
         )
       case 'fleet':
-        return <FleetList vehicles={vehicles} setVehicles={setVehicles} />
+        return (
+          <FleetList 
+            vehicles={vehicles} 
+            setVehicles={handleUpdateVehicles}
+            onCreateVehicle={handleCreateVehicle}
+            onUpdateVehicle={handleUpdateVehicle}
+            onDeleteVehicle={handleDeleteVehicle}
+          />
+        )
       case 'assignment':
         return (
           <FleetAssignment 
             vehicles={vehicles}
+            clients={clients}
             assignments={assignments}
             onAssignVehicle={handleAssignVehicle}
             onReturnVehicle={handleReturnVehicle}
@@ -179,9 +271,9 @@ function App() {
           />
         )
       case 'clients':
-        return <Clients />
+        return <Clients clients={clients} refreshData={refreshData} />
       case 'reports':
-        return <Reports vehicles={vehicles} assignments={assignments} />
+        return <Reports vehicles={vehicles} clients={clients} assignments={assignments} />
       case 'users':
         return <UserManagement />
       case 'help':

@@ -3,12 +3,12 @@ import { Plus, Search, Trash2, Calendar, MapPin, CheckCircle, Car } from 'lucide
 import { motion } from 'framer-motion'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-import clientsData from '../data/clients.json'
 import KPICard from '../components/KPICard'
 import CustomSelect from '../components/CustomSelect'
 
 const FleetAssignment = ({ 
   vehicles, 
+  clients = [],
   assignments, 
   onAssignVehicle, 
   onReturnVehicle, 
@@ -49,7 +49,7 @@ const FleetAssignment = ({
   const filteredAssignments = useMemo(() => {
     return assignments.filter(a => {
       const vehicle = vehicles.find(v => v.id === a.vehicleId)
-      const client = clientsData.find(c => c.id === a.clientId)
+      const client = clients.find(c => c.id === a.clientId)
       const searchLower = searchTerm.toLowerCase()
       return (
         (vehicle?.registrationNo.toLowerCase().includes(searchLower)) ||
@@ -89,7 +89,7 @@ const FleetAssignment = ({
       return
     }
 
-    const client = clientsData.find(c => c.id === formData.clientId)
+    const client = clients.find(c => c.id === formData.clientId)
 
     if (editingAssignment) {
       // Update existing assignment
@@ -121,7 +121,7 @@ const FleetAssignment = ({
   }
 
   const getUserName = (clientId) => {
-    const client = clientsData.find(c => c.id === clientId)
+    const client = clients.find(c => c.id === clientId)
     return client ? client.name : 'N/A'
   }
 
@@ -359,7 +359,7 @@ const FleetAssignment = ({
                   label="Client *"
                   value={formData.clientId}
                   onChange={(value) => setFormData({ ...formData, clientId: value })}
-                  options={clientsData.map(c => ({
+                  options={clients.map(c => ({
                     value: c.id,
                     label: c.name
                   }))}

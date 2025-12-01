@@ -3,15 +3,15 @@ import { Download, Car, Users, Calendar, Briefcase, Link2, FileText } from 'luci
 import { motion } from 'framer-motion'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import clientsData from '../data/clients.json'
 import KPICard from '../components/KPICard'
 import avisLogoWebp from '../assets/Avis.webp'
 
-const Reports = ({ vehicles, assignments = [] }) => {
+const Reports = ({ vehicles, clients = [], assignments = [] }) => {
   const [selectedReport, setSelectedReport] = useState('fleet')
   
   // Use vehicles from props or empty array as fallback
   const vehiclesData = vehicles || []
+  const clientsData = clients || []
 
   const exportToCSV = (data, filename) => {
     // Exclude certain columns from fleet export

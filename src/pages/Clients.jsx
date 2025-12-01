@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FaUser } from 'react-icons/fa'
 import KPICard from '../components/KPICard'
 import CustomSelect from '../components/CustomSelect'
-import clientsData from '../data/clients.json'
+import { clientsApi } from '../lib/d1Client'
 
-const Clients = () => {
-  const [clients, setClients] = useState(clientsData)
+const Clients = ({ clients: initialClients = [], refreshData }) => {
+  // Use clients from props (from D1 database)
+  const clients = initialClients
 
   const [searchTerm, setSearchTerm] = useState('')
   const [showModal, setShowModal] = useState(false)
@@ -64,35 +65,42 @@ const Clients = () => {
     setShowModal(true)
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.name || !formData.email || !formData.phone) {
       alert('Please fill in Name, Email, and Phone')
       return
     }
 
-    if (editingClient) {
-      setClients(clients.map(c =>
-        c.id === editingClient.id
-          ? { ...c, ...formData }
-          : c
-      ))
-    } else {
-      setClients([
-        ...clients,
-        {
-          id: `CLI${String(clients.length + 1).padStart(3, '0')}`,
-          ...formData,
-          addedDate: new Date().toISOString().split('T')[0],
-        },
-      ])
+    try {
+      if (editingClient) {
+        await clientsApi.update(editingClient.id, formData)
+      } else {
+        await clientsApi.create(formData)
+      }
+      // Refresh data from server
+      if (refreshData) {
+        await refreshData()
+      }
+      setShowModal(false)
+    } catch (error) {
+      console.error('Error saving client:', error)
+      alert('Error saving client. Please try again.')
     }
-    setShowModal(false)
   }
 
-  const handleDelete = (e, id) => {
+  const handleDelete = async (e, id) => {
     e.stopPropagation()
     if (window.confirm('Are you sure you want to delete this client?')) {
-      setClients(clients.filter(c => c.id !== id))
+      try {
+        await clientsApi.delete(id)
+        // Refresh data from server
+        if (refreshData) {
+          await refreshData()
+        }
+      } catch (error) {
+        console.error('Error deleting client:', error)
+        alert('Error deleting client. Please try again.')
+      }
     }
   }
 

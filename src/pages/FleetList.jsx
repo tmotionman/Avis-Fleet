@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import KPICard from '../components/KPICard'
 import CustomSelect from '../components/CustomSelect'
 
-const FleetList = ({ vehicles, setVehicles }) => {
+const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, onDeleteVehicle }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [availabilityTab, setAvailabilityTab] = useState('All') // 'All', 'Available', 'Unavailable'
@@ -134,15 +134,20 @@ const FleetList = ({ vehicles, setVehicles }) => {
     setShowDeleteConfirm(true)
   }
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (vehicleToDelete) {
-      setVehicles(vehicles.filter(v => v.id !== vehicleToDelete.id))
-      setShowDeleteConfirm(false)
-      setVehicleToDelete(null)
+      try {
+        await onDeleteVehicle(vehicleToDelete.id)
+        setShowDeleteConfirm(false)
+        setVehicleToDelete(null)
+      } catch (error) {
+        console.error('Error deleting vehicle:', error)
+        alert('Error deleting vehicle. Please try again.')
+      }
     }
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.registrationNo || !formData.model) {
       alert('Please fill in Registration No and Model')
       return
@@ -153,13 +158,17 @@ const FleetList = ({ vehicles, setVehicles }) => {
       year: parseInt(formData.year) || new Date().getFullYear(),
     }
 
-    if (editingVehicle) {
-      setVehicles(vehicles.map(v => v.id === editingVehicle.id ? { ...v, ...vehicleData } : v))
-    } else {
-      const newId = `VEH${String(vehicles.length + 1).padStart(3, '0')}`
-      setVehicles([...vehicles, { id: newId, ...vehicleData, lastServiceDate: new Date().toISOString().split('T')[0] }])
+    try {
+      if (editingVehicle) {
+        await onUpdateVehicle(editingVehicle.id, vehicleData)
+      } else {
+        await onCreateVehicle(vehicleData)
+      }
+      setShowModal(false)
+    } catch (error) {
+      console.error('Error saving vehicle:', error)
+      alert('Error saving vehicle. Please try again.')
     }
-    setShowModal(false)
   }
 
   const getStatusBadgeColor = (status) => {
