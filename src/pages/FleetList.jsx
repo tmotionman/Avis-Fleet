@@ -38,11 +38,19 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
 
   // Filter and search logic
   const filteredVehicles = useMemo(() => {
+    if (!vehicles || !Array.isArray(vehicles)) return []
+    
     let result = vehicles.filter(v => {
-      const matchesSearch = v.registrationNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        v.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (v.location && v.location.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (v.assignedTo && v.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()))
+      if (!v) return false
+      const regNo = v.registrationNo || v.licensePlate || ''
+      const model = v.model || ''
+      const location = v.location || ''
+      const assignedTo = v.assignedTo || ''
+      
+      const matchesSearch = regNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        assignedTo.toLowerCase().includes(searchTerm.toLowerCase())
       const matchesStatusFilter = statusFilter === 'All' || v.status === statusFilter
       
       // Availability filter: Available vs Unavailable (On Rent, Maintenance)
