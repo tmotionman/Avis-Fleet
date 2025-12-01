@@ -124,9 +124,9 @@ const OnboardingTour = ({ isOpen, onClose, onNavigate }) => {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] flex items-center justify-center"
         >
-          {/* Darkened Background Overlay */}
+          {/* Darkened Background Overlay - No Blur */}
           <div 
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70"
             onClick={handleSkip}
           />
 
@@ -138,8 +138,8 @@ const OnboardingTour = ({ isOpen, onClose, onNavigate }) => {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="relative z-10 w-full max-w-md mx-4"
           >
-            {/* Grey Card */}
-            <div className="bg-gray-800 rounded-2xl shadow-2xl overflow-hidden border border-gray-700">
+            {/* Grey Card - Same UI color as sidebar */}
+            <div className="bg-[#262626] rounded-2xl shadow-2xl overflow-hidden border border-gray-700">
               {/* Close Button */}
               <button
                 onClick={handleSkip}
@@ -227,7 +227,7 @@ const OnboardingTour = ({ isOpen, onClose, onNavigate }) => {
               </div>
 
               {/* Step Counter */}
-              <div className="bg-gray-900/50 px-8 py-3 text-center">
+              <div className="bg-[#1f1f1f] px-8 py-3 text-center">
                 <span className="text-sm text-gray-400">
                   Step {currentStep + 1} of {tourSteps.length}
                 </span>
