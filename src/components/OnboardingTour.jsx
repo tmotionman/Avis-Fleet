@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ChevronRight, ChevronLeft, Car, Users, ClipboardList, BarChart3, HelpCircle, LayoutDashboard } from 'lucide-react'
+import { X, ChevronRight, ChevronLeft } from 'lucide-react'
 
 const tourSteps = [
   {
     id: 'welcome',
-    title: 'Welcome to Avis Fleet! 👋',
+    title: 'Welcome to Avis Fleet',
     description: 'Let us show you around the system. This quick tour will help you get started with managing your fleet efficiently.',
-    icon: Car,
     position: 'center',
   },
   {
     id: 'dashboard',
     title: 'Dashboard Overview',
     description: 'Your dashboard gives you a quick overview of your fleet status, including total vehicles, availability, and recent activity.',
-    icon: LayoutDashboard,
     position: 'center',
     highlight: 'dashboard',
   },
@@ -22,7 +20,6 @@ const tourSteps = [
     id: 'fleet',
     title: 'Fleet Management',
     description: 'Add, edit, and manage all your vehicles here. Track status, location, and maintenance schedules for each vehicle.',
-    icon: Car,
     position: 'center',
     highlight: 'fleet',
   },
@@ -30,7 +27,6 @@ const tourSteps = [
     id: 'assignments',
     title: 'Fleet Assignments',
     description: 'Assign vehicles to clients, track active rentals, and manage returns. Keep your fleet utilization optimized.',
-    icon: ClipboardList,
     position: 'center',
     highlight: 'assignment',
   },
@@ -38,7 +34,6 @@ const tourSteps = [
     id: 'clients',
     title: 'Client Management',
     description: 'Manage your client database. Add new clients, update contact information, and track their rental history.',
-    icon: Users,
     position: 'center',
     highlight: 'clients',
   },
@@ -46,7 +41,6 @@ const tourSteps = [
     id: 'reports',
     title: 'Reports & Analytics',
     description: 'Generate detailed reports for your fleet, clients, and assignments. Export to PDF or CSV for your records.',
-    icon: BarChart3,
     position: 'center',
     highlight: 'reports',
   },
@@ -54,15 +48,13 @@ const tourSteps = [
     id: 'help',
     title: 'Need Help?',
     description: 'Visit the Help section anytime for guides, FAQs, and support contact information. You can also restart this tour from there.',
-    icon: HelpCircle,
     position: 'center',
     highlight: 'help',
   },
   {
     id: 'complete',
-    title: "You're All Set! 🎉",
-    description: "That's it! You're ready to start managing your fleet. Click 'Get Started' to begin. You can always access help from the sidebar.",
-    icon: Car,
+    title: "You're All Set",
+    description: "That's it! You're ready to start managing your fleet. Click Get Started to begin exploring the dashboard.",
     position: 'center',
   },
 ]
@@ -76,6 +68,10 @@ const OnboardingTour = ({ isOpen, onClose, onNavigate }) => {
 
   const handleNext = () => {
     if (isLastStep) {
+      // Navigate to dashboard on tour completion
+      if (onNavigate) {
+        onNavigate('dashboard')
+      }
       onClose()
     } else {
       // Navigate to the highlighted page if specified
@@ -113,8 +109,6 @@ const OnboardingTour = ({ isOpen, onClose, onNavigate }) => {
 
   if (!isOpen) return null
 
-  const IconComponent = step.icon
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -124,9 +118,9 @@ const OnboardingTour = ({ isOpen, onClose, onNavigate }) => {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] flex items-center justify-center"
         >
-          {/* Darkened Background Overlay - No Blur */}
+          {/* Darkened Background Overlay - Reduced Opacity */}
           <div 
-            className="absolute inset-0 bg-black/70"
+            className="absolute inset-0 bg-black/50"
             onClick={handleSkip}
           />
 
@@ -150,11 +144,6 @@ const OnboardingTour = ({ isOpen, onClose, onNavigate }) => {
 
               {/* Card Content */}
               <div className="p-8">
-                {/* Icon */}
-                <div className="w-16 h-16 bg-avis-red/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <IconComponent size={32} className="text-avis-red" />
-                </div>
-
                 {/* Title */}
                 <h2 className="text-2xl font-bold text-white text-center mb-3">
                   {step.title}
