@@ -101,16 +101,7 @@ const Clients = () => {
   }
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case 'Active':
-        return 'bg-green-100 text-green-700'
-      case 'Inactive':
-        return 'bg-gray-100 text-gray-700'
-      case 'Suspended':
-        return 'bg-red-100 text-red-700'
-      default:
-        return 'bg-gray-100 text-gray-700'
-    }
+    return 'text-gray-700 font-medium'
   }
 
   return (
@@ -233,7 +224,7 @@ const Clients = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(client.status)}`}>
+                      <span className={`text-sm ${getStatusColor(client.status)}`}>
                         {client.status}
                       </span>
                     </td>
