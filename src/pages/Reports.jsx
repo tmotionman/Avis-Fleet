@@ -310,7 +310,7 @@ const Reports = ({ vehicles, assignments = [] }) => {
                   <td className="px-4 py-2">{c.phone}</td>
                   <td className="px-4 py-2">{c.industry}</td>
                   <td className="px-4 py-2">{c.city}</td>
-                  <td className="px-4 py-2"><span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">{c.status}</span></td>
+                  <td className="px-4 py-2"><span className="text-gray-700 text-sm font-medium">{c.status}</span></td>
                 </tr>
               ))}
             </tbody>
