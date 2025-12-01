@@ -234,7 +234,7 @@ const Clients = () => {
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={(e) => handleEditClick(e, client)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                           title="Edit"
                         >
                           <Edit size={16} />
