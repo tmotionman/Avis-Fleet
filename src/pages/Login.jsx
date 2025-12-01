@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaUser } from 'react-icons/fa'
 import bg1600Avif from '../../assets/bg-1600.avif'
 import bg800Avif from '../../assets/bg-800.avif'
 import bg400Avif from '../../assets/bg-400.avif'
@@ -8,9 +8,12 @@ import bg1600Webp from '../../assets/bg-1600.webp'
 import bg800Webp from '../../assets/bg-800.webp'
 import bg400Webp from '../../assets/bg-400.webp'
 
-const Login = ({ onLogin }) => {
+const Login = ({ onLogin, onSignup }) => {
+  const [isSignupMode, setIsSignupMode] = useState(false)
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -42,8 +45,61 @@ const Login = ({ onLogin }) => {
         name: email.split('@')[0],
         email: email,
         role: 'Admin',
+        isNewUser: false,
       })
     }, 1000)
+  }
+
+  const handleSignup = (e) => {
+    e.preventDefault()
+    setError('')
+    setIsLoading(true)
+
+    // Simulate signup delay
+    setTimeout(() => {
+      if (!name || !email || !password || !confirmPassword) {
+        setError('Please fill in all fields')
+        setIsLoading(false)
+        return
+      }
+
+      if (!email.includes('@')) {
+        setError('Please enter a valid email address')
+        setIsLoading(false)
+        return
+      }
+
+      if (password.length < 6) {
+        setError('Password must be at least 6 characters')
+        setIsLoading(false)
+        return
+      }
+
+      if (password !== confirmPassword) {
+        setError('Passwords do not match')
+        setIsLoading(false)
+        return
+      }
+
+      // Create new user with isNewUser flag for onboarding
+      const newUserId = 'USR' + Date.now().toString().slice(-6)
+      onSignup({
+        id: newUserId,
+        name: name,
+        email: email,
+        role: 'Admin',
+        isNewUser: true,
+      })
+    }, 1000)
+  }
+
+  const switchMode = () => {
+    setIsSignupMode(!isSignupMode)
+    setError('')
+    setName('')
+    setEmail('')
+    setPassword('')
+    setConfirmPassword('')
   }
 
   const [bgLoaded, setBgLoaded] = useState(false)
@@ -151,8 +207,14 @@ const Login = ({ onLogin }) => {
           className="w-full lg:max-w-md bg-white/95 lg:bg-white/95 backdrop-blur-md rounded-none lg:rounded-2xl shadow-lg lg:shadow-2xl p-6 lg:p-8 border-none lg:border lg:border-gray-200 z-30"
         >
             <div className="mb-8">
-              <h2 className="text-3xl font-bold text-avis-black mb-2">Welcome Back</h2>
-              <p className="text-gray-600">Sign in to your Avis Fleet account</p>
+              <h2 className="text-3xl font-bold text-avis-black mb-2">
+                {isSignupMode ? 'Create Account' : 'Welcome Back'}
+              </h2>
+              <p className="text-gray-600">
+                {isSignupMode 
+                  ? 'Sign up to start managing your fleet' 
+                  : 'Sign in to your Avis Fleet account'}
+              </p>
             </div>
 
             {/* Error Message */}
@@ -166,8 +228,29 @@ const Login = ({ onLogin }) => {
               </motion.div>
             )}
 
-            {/* Login Form */}
-            <form onSubmit={handleLogin} className="space-y-5">
+            {/* Login/Signup Form */}
+            <form onSubmit={isSignupMode ? handleSignup : handleLogin} className="space-y-5">
+              {/* Name Field (Signup only) */}
+              {isSignupMode && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                >
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                  <div className="relative">
+                    <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="John Doe"
+                      className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avis-red focus:border-transparent transition-all"
+                    />
+                  </div>
+                </motion.div>
+              )}
+
               {/* Email Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
@@ -192,7 +275,7 @@ const Login = ({ onLogin }) => {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder={isSignupMode ? 'Create a password' : 'Enter your password'}
                     className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avis-red focus:border-transparent transition-all"
                   />
                   <button
@@ -205,18 +288,41 @@ const Login = ({ onLogin }) => {
                 </div>
               </div>
 
-              {/* Remember & Forgot Password */}
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2 text-gray-700 cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4 rounded border-gray-300 cursor-pointer" />
-                  Remember me
-                </label>
-                <a href="#" className="text-avis-red hover:text-red-700 font-medium">
-                  Forgot password?
-                </a>
-              </div>
+              {/* Confirm Password Field (Signup only) */}
+              {isSignupMode && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                >
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                  <div className="relative">
+                    <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Confirm your password"
+                      className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avis-red focus:border-transparent transition-all"
+                    />
+                  </div>
+                </motion.div>
+              )}
 
-              {/* Login Button */}
+              {/* Remember & Forgot Password (Login only) */}
+              {!isSignupMode && (
+                <div className="flex items-center justify-between text-sm">
+                  <label className="flex items-center gap-2 text-gray-700 cursor-pointer">
+                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 cursor-pointer" />
+                    Remember me
+                  </label>
+                  <a href="#" className="text-avis-red hover:text-red-700 font-medium">
+                    Forgot password?
+                  </a>
+                </div>
+              )}
+
+              {/* Submit Button */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -227,18 +333,32 @@ const Login = ({ onLogin }) => {
                 {isLoading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Signing in...
+                    {isSignupMode ? 'Creating Account...' : 'Signing in...'}
                   </>
                 ) : (
-                  'Sign In'
+                  isSignupMode ? 'Create Account' : 'Sign In'
                 )}
               </motion.button>
             </form>
 
-            {/* Terms of Service and Privacy Policy */}
+            {/* Switch Mode */}
             <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                {isSignupMode ? 'Already have an account?' : "Don't have an account?"}{' '}
+                <button
+                  type="button"
+                  onClick={switchMode}
+                  className="text-avis-red hover:text-red-700 font-semibold"
+                >
+                  {isSignupMode ? 'Sign In' : 'Sign Up'}
+                </button>
+              </p>
+            </div>
+
+            {/* Terms of Service and Privacy Policy */}
+            <div className="mt-4 text-center">
               <p className="text-xs text-gray-500">
-                By signing in, you agree to our{' '}
+                By {isSignupMode ? 'signing up' : 'signing in'}, you agree to our{' '}
                 <button
                   type="button"
                   onClick={() => setShowTerms(true)}

@@ -12,6 +12,7 @@ import Reports from './pages/Reports'
 import UserManagement from './pages/UserManagement'
 import Help from './pages/Help'
 import { vehiclesApi, clientsApi, assignmentsApi } from './lib/d1Client'
+import { dummyVehicles, dummyClients, dummyAssignments } from './data/dummyTourData'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -38,6 +39,10 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [dataError, setDataError] = useState(null)
 
+  // Tour state for new users
+  const [showTour, setShowTour] = useState(false)
+  const [isTourMode, setIsTourMode] = useState(false)
+
   // Centralized vehicle state - fetched from D1 database
   const [vehicles, setVehicles] = useState([])
 
@@ -50,6 +55,15 @@ function App() {
   // Fetch all data from D1 database on mount
   useEffect(() => {
     const fetchData = async () => {
+      // If in tour mode (new user), use dummy data
+      if (isTourMode) {
+        setVehicles(dummyVehicles)
+        setClients(dummyClients)
+        setAssignments(dummyAssignments)
+        setIsLoading(false)
+        return
+      }
+
       setIsLoading(true)
       setDataError(null)
       try {
@@ -72,7 +86,7 @@ function App() {
     if (isAuthenticated) {
       fetchData()
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, isTourMode])
 
   // Refresh data function
   const refreshData = async () => {
@@ -180,6 +194,7 @@ function App() {
   const handleLogin = (userData) => {
     setCurrentUser(userData)
     setIsAuthenticated(true)
+    setIsTourMode(false)
     try {
       localStorage.setItem('avis_isAuthenticated', 'true')
       localStorage.setItem('avis_currentUser', JSON.stringify(userData))
@@ -188,10 +203,56 @@ function App() {
     }
   }
 
+  const handleSignup = (userData) => {
+    // New user signup - show tour with dummy data
+    setCurrentUser(userData)
+    setIsAuthenticated(true)
+    setIsTourMode(true)
+    setShowTour(true)
+    try {
+      localStorage.setItem('avis_isAuthenticated', 'true')
+      localStorage.setItem('avis_currentUser', JSON.stringify(userData))
+    } catch (e) {
+      // ignore storage errors
+    }
+  }
+
+  const handleTourComplete = async () => {
+    setShowTour(false)
+    setIsTourMode(false)
+    // After tour completes, show empty data (real database data)
+    setIsLoading(true)
+    try {
+      const [vehiclesData, clientsData, assignmentsData] = await Promise.all([
+        vehiclesApi.getAll(),
+        clientsApi.getAll(),
+        assignmentsApi.getAll()
+      ])
+      setVehicles(vehiclesData)
+      setClients(clientsData)
+      setAssignments(assignmentsData)
+    } catch (error) {
+      // If error, just clear the dummy data
+      setVehicles([])
+      setClients([])
+      setAssignments([])
+    } finally {
+      setIsLoading(false)
+    }
+    // Mark tour as completed for this user
+    try {
+      localStorage.setItem(`avis_tour_completed_${currentUser?.id}`, 'true')
+    } catch (e) {
+      // ignore
+    }
+  }
+
   const handleLogout = () => {
     setCurrentUser(null)
     setIsAuthenticated(false)
     setCurrentPage('dashboard')
+    setIsTourMode(false)
+    setShowTour(false)
     try {
       localStorage.removeItem('avis_isAuthenticated')
       localStorage.removeItem('avis_currentUser')
@@ -202,7 +263,7 @@ function App() {
 
   // Show login screen if not authenticated
   if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />
+    return <Login onLogin={handleLogin} onSignup={handleSignup} />
   }
 
   // Show loading screen while fetching data
@@ -307,7 +368,8 @@ function App() {
 
       {/* Onboarding Tour for new users */}
       <OnboardingTour 
-        userId={currentUser?.id} 
+        isOpen={showTour}
+        onClose={handleTourComplete}
         onNavigate={setCurrentPage} 
       />
     </div>
