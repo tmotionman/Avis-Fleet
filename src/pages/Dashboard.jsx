@@ -195,28 +195,26 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
             <h3 className="text-lg font-semibold text-avis-black mb-4">Clients by City</h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={clientsByCity} layout="vertical" margin={{ top: 5, right: 30, left: 100, bottom: 5 }}>
+                <BarChart data={clientsByCity} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
                   <defs>
-                    <linearGradient id="clientBarGradient" x1="0" y1="0" x2="1" y2="0">
+                    <linearGradient id="clientBarGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#E41E26" stopOpacity={1}/>
                       <stop offset="100%" stopColor="#E41E26" stopOpacity={0.6}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f3f4f6" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
                   <XAxis 
-                    type="number"
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#6B7280', fontSize: 12, fontWeight: 500 }} 
+                    dy={10}
+                  />
+                  <YAxis 
                     axisLine={false} 
                     tickLine={false} 
                     tick={{ fill: '#6B7280', fontSize: 12 }}
                     allowDecimals={false}
-                  />
-                  <YAxis 
-                    dataKey="name"
-                    type="category"
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: '#6B7280', fontSize: 12, fontWeight: 500 }}
-                    width={95}
                   />
                   <Tooltip 
                     contentStyle={{ 
@@ -228,12 +226,12 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
                     }}
                     itemStyle={{ color: '#F3F4F6' }}
                     cursor={{ fill: '#F9FAFB', opacity: 0.5 }}
-                    formatter={(value) => [Math.round(value), 'Clients']}
+                    formatter={(value) => Math.round(value)}
                   />
                   <Bar 
                     dataKey="count" 
                     fill="url(#clientBarGradient)" 
-                    radius={[0, 6, 6, 0]} 
+                    radius={[6, 6, 0, 0]} 
                     name="Clients"
                   />
                 </BarChart>
