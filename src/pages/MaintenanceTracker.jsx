@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
-import { Plus, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Edit, Trash2, ChevronLeft, ChevronRight, Wrench, DollarSign, Clock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import maintenanceData from '../data/maintenance.json'
+import KPICard from '../components/KPICard'
 
 const MaintenanceTracker = () => {
   const [maintenance, setMaintenance] = useState(maintenanceData)
@@ -100,27 +101,21 @@ const MaintenanceTracker = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <motion.div
-          whileHover={{ y: -5 }}
-          className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
-        >
-          <p className="text-gray-500 text-sm font-medium">Total Records</p>
-          <h3 className="text-3xl font-bold text-avis-black mt-2">{maintenance.length}</h3>
-        </motion.div>
-        <motion.div
-          whileHover={{ y: -5 }}
-          className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
-        >
-          <p className="text-gray-500 text-sm font-medium">Total Cost</p>
-          <h3 className="text-3xl font-bold text-avis-black mt-2">R{totalCost.toLocaleString('en-ZA', { maximumFractionDigits: 0 })}</h3>
-        </motion.div>
-        <motion.div
-          whileHover={{ y: -5 }}
-          className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
-        >
-          <p className="text-gray-500 text-sm font-medium">Pending Services</p>
-          <h3 className="text-3xl font-bold text-avis-black mt-2">{maintenance.filter(m => m.status === 'Scheduled').length}</h3>
-        </motion.div>
+        <KPICard 
+          label="Total Records" 
+          value={maintenance.length} 
+          icon={<Wrench />} 
+        />
+        <KPICard 
+          label="Total Cost" 
+          value={`R${totalCost.toLocaleString('en-ZA', { maximumFractionDigits: 0 })}`} 
+          icon={<DollarSign />} 
+        />
+        <KPICard 
+          label="Pending Services" 
+          value={maintenance.filter(m => m.status === 'Scheduled').length} 
+          icon={<Clock />} 
+        />
       </div>
 
       {/* Table */}
@@ -277,18 +272,22 @@ const MaintenanceTracker = () => {
               </div>
             </div>
             <div className="flex gap-3 mt-8">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setShowModal(false)}
-                className="btn-secondary flex-1"
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200"
               >
                 Cancel
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleSave}
-                className="btn-primary flex-1"
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
               >
                 {editingRecord ? 'Update' : 'Add'}
-              </button>
+              </motion.button>
             </div>
           </motion.div>
         </motion.div>

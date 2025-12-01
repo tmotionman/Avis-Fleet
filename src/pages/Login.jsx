@@ -312,21 +312,25 @@ const Login = ({ onLogin }) => {
               </div>
             </div>
             <div className="flex gap-3">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setShowSignUp(false)}
-                className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200"
               >
                 Cancel
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setShowSignUp(false)
                   alert('Sign up feature coming soon!')
                 }}
-                className="flex-1 px-4 py-2 bg-avis-red text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
               >
                 Create Account
-              </button>
+              </motion.button>
             </div>
           </motion.div>
         </motion.div>

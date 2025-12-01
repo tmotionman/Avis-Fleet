@@ -1,6 +1,6 @@
 import React from 'react'
 import { X, Menu } from 'lucide-react'
-import { FaChartLine, FaCarSide, FaFileAlt, FaUsers, FaLink } from 'react-icons/fa'
+import { FaChartLine, FaCarSide, FaFileAlt, FaUsers, FaLink, FaQuestionCircle } from 'react-icons/fa'
 import { motion } from 'framer-motion'
 
 // Always-expanded sidebar (w-64) - icons + labels
@@ -8,10 +8,10 @@ const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) =
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: FaChartLine },
     { id: 'assignment', label: 'Fleet Assignment', icon: FaLink },
-  { id: 'fleet', label: 'Fleet Management', icon: FaCarSide },
-  { id: 'clients', label: 'Clients', icon: FaUsers },
+    { id: 'fleet', label: 'Fleet Management', icon: FaCarSide },
+    { id: 'clients', label: 'Clients', icon: FaUsers },
     { id: 'reports', label: 'Reports', icon: FaFileAlt },
-    { id: 'users', label: 'User Management', icon: FaUsers },
+    { id: 'help', label: 'Help & About', icon: FaQuestionCircle },
   ]
 
   return (
@@ -36,7 +36,7 @@ const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) =
       )}
 
       {/* Desktop Sidebar - permanently expanded */}
-  <div className="hidden lg:flex fixed inset-y-0 left-0 top-0 bottom-0 h-screen w-64 bg-[#262626] border-r border-gray-800 flex-col items-start py-6 z-40 overflow-y-auto">
+  <div className="hidden lg:flex fixed inset-y-0 left-0 top-0 bottom-0 h-screen w-64 bg-[#262626] border-r-[0.25px] border-avis-red shadow-[4px_0_24px_rgba(228,30,38,0.15)] flex-col items-start py-6 z-40 overflow-y-auto">
 
         {/* Navigation Items */}
         <nav className="flex-1 flex flex-col gap-3 w-full px-4 pt-12">
@@ -71,7 +71,7 @@ const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) =
         </nav>
 
         {/* Desktop bottom copyright (pinned to bottom) */}
-        <div className="absolute left-0 right-0 bottom-3 px-4">
+        <div className="absolute left-0 right-0 bottom-3 px-4 border-t border-gray-600 pt-3">
           <p className="text-xs text-gray-400 text-center">© 2025 Ancestro</p>
         </div>
       </div>
@@ -81,13 +81,13 @@ const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) =
         initial={{ x: -300 }}
         animate={{ x: sidebarOpen ? 0 : -300 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed lg:hidden left-0 top-0 h-screen w-72 bg-[#262626] z-40 flex flex-col overflow-y-auto"
+        className="fixed lg:hidden left-0 top-0 h-screen w-72 bg-[#262626] border-r-[0.25px] border-avis-red shadow-[4px_0_24px_rgba(228,30,38,0.15)] z-40 flex flex-col overflow-y-auto"
       >
         {/* Mobile Header */}
         <div className="h-20 flex items-center justify-center border-b border-gray-800">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-red-600">AVIS</h1>
-            <p className="text-xs text-gray-500">Fleet Manager</p>
+            <h1 className="text-lg font-bold text-red-600">AVIS</h1>
+            <p className="text-xs text-gray-500">Fleet Management</p>
           </div>
         </div>
 
@@ -118,7 +118,7 @@ const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) =
 
         {/* Mobile User Profile removed for mobile view per request */}
         {/* Mobile copyright */}
-        <div className="px-4 py-3 text-center">
+        <div className="px-4 py-3 text-center border-t border-gray-600">
           <p className="text-xs text-gray-400">© 2025 Ancestro</p>
         </div>
       </motion.div>

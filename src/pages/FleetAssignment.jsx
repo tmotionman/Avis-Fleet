@@ -1,14 +1,25 @@
 import React, { useState, useMemo } from 'react'
-import { Plus, Search, Trash2, Calendar, MapPin } from 'lucide-react'
+import { Plus, Search, Trash2, Calendar, MapPin, CheckCircle, Car } from 'lucide-react'
 import { motion } from 'framer-motion'
-import vehiclesData from '../data/vehicles.json'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 import clientsData from '../data/clients.json'
+import KPICard from '../components/KPICard'
+import CustomSelect from '../components/CustomSelect'
 
-const FleetAssignment = () => {
-  const [assignments, setAssignments] = useState([])
+const FleetAssignment = ({ 
+  vehicles, 
+  assignments, 
+  onAssignVehicle, 
+  onReturnVehicle, 
+  onUpdateAssignment, 
+  onDeleteAssignment 
+}) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [editingAssignment, setEditingAssignment] = useState(null)
+  const [startDateOpen, setStartDateOpen] = useState(false)
+  const [endDateOpen, setEndDateOpen] = useState(false)
   const [formData, setFormData] = useState({
     vehicleId: '',
     clientId: '',
@@ -17,15 +28,27 @@ const FleetAssignment = () => {
     purpose: '',
   })
 
-  // Available vehicles are those with 'Active' status
+  // Available vehicles are those with 'Available' status (not already assigned)
+  // When editing, also include the currently assigned vehicle
   const availableVehicles = useMemo(() => {
-    return vehiclesData.filter(v => v.status === 'Active' && !assignments.some(a => a.vehicleId === v.id && !a.returnDate))
-  }, [assignments])
+    return vehicles.filter(v => v.status === 'Available')
+  }, [vehicles])
+
+  // Vehicles available for selection in modal (includes current vehicle when editing)
+  const selectableVehicles = useMemo(() => {
+    if (editingAssignment) {
+      const currentVehicle = vehicles.find(v => v.id === editingAssignment.vehicleId)
+      if (currentVehicle && currentVehicle.status !== 'Available') {
+        return [...availableVehicles, currentVehicle]
+      }
+    }
+    return availableVehicles
+  }, [vehicles, availableVehicles, editingAssignment])
 
   // Filter assigned vehicles based on search
   const filteredAssignments = useMemo(() => {
     return assignments.filter(a => {
-      const vehicle = vehiclesData.find(v => v.id === a.vehicleId)
+      const vehicle = vehicles.find(v => v.id === a.vehicleId)
       const client = clientsData.find(c => c.id === a.clientId)
       const searchLower = searchTerm.toLowerCase()
       return (
@@ -34,7 +57,7 @@ const FleetAssignment = () => {
         (a.purpose?.toLowerCase().includes(searchLower))
       )
     })
-  }, [assignments, searchTerm])
+  }, [assignments, searchTerm, vehicles])
 
   const handleAddClick = () => {
     setEditingAssignment(null)
@@ -66,37 +89,34 @@ const FleetAssignment = () => {
       return
     }
 
+    const client = clientsData.find(c => c.id === formData.clientId)
+
     if (editingAssignment) {
-      setAssignments(assignments.map(a =>
-        a.id === editingAssignment.id ? { ...a, ...formData } : a
-      ))
+      // Update existing assignment
+      onUpdateAssignment(editingAssignment.id, formData)
     } else {
-      setAssignments([
-        ...assignments,
-        {
-          id: `ASG${Date.now()}`,
-          ...formData,
-          assignedDate: new Date().toISOString().split('T')[0],
-        },
-      ])
+      // Create new assignment - this will automatically set vehicle to "On Rent"
+      onAssignVehicle({
+        id: `ASG${Date.now()}`,
+        ...formData,
+        clientName: client?.name || 'Unknown',
+        assignedDate: new Date().toISOString().split('T')[0],
+      })
     }
     setShowModal(false)
   }
 
   const handleReturnVehicle = (assignmentId) => {
-    setAssignments(assignments.map(a =>
-      a.id === assignmentId
-        ? { ...a, returnDate: new Date().toISOString().split('T')[0] }
-        : a
-    ))
+    // This will automatically set vehicle status back to "Available"
+    onReturnVehicle(assignmentId)
   }
 
   const handleDelete = (id) => {
-    setAssignments(assignments.filter(a => a.id !== id))
+    onDeleteAssignment(id)
   }
 
   const getVehicleName = (vehicleId) => {
-    const vehicle = vehiclesData.find(v => v.id === vehicleId)
+    const vehicle = vehicles.find(v => v.id === vehicleId)
     return vehicle ? `${vehicle.registrationNo} (${vehicle.model})` : 'N/A'
   }
 
@@ -122,16 +142,39 @@ const FleetAssignment = () => {
                 <p className="text-gray-500 mt-1">Assign available vehicles to clients</p>
               </div>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <button
           onClick={handleAddClick}
           disabled={availableVehicles.length === 0}
-          className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-avis-red to-red-700 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Plus size={20} />
+          <Plus size={16} />
           New Assignment
-        </motion.button>
+        </button>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Active Assignments</p>
+            <p className="text-3xl font-bold text-white mt-1">{activeAssignments.length}</p>
+          </div>
+          <div className="w-3 h-3 rounded-full bg-avis-red"></div>
+        </div>
+        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Available Vehicles</p>
+            <p className="text-3xl font-bold text-white mt-1">{availableVehicles.length}</p>
+          </div>
+          <div className="w-3 h-3 rounded-full bg-avis-red"></div>
+        </div>
+        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Completed</p>
+            <p className="text-3xl font-bold text-white mt-1">{completedAssignments.length}</p>
+          </div>
+          <div className="w-3 h-3 rounded-full bg-avis-red"></div>
+        </div>
       </div>
 
       {/* Available Vehicles Alert */}
@@ -177,11 +220,11 @@ const FleetAssignment = () => {
                   <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
                     <div>
                       <p className="text-xs text-gray-500 uppercase font-semibold">Vehicle</p>
-                      <p className="text-sm font-bold text-avis-black mt-1">{getVehicleName(assignment.vehicleId)}</p>
+                      <p className="text-sm text-avis-black mt-1">{getVehicleName(assignment.vehicleId)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 uppercase font-semibold">Client</p>
-                      <p className="text-sm font-bold text-avis-black mt-1">{getUserName(assignment.clientId)}</p>
+                      <p className="text-sm text-avis-black mt-1">{getUserName(assignment.clientId)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 uppercase font-semibold">Purpose</p>
@@ -196,20 +239,20 @@ const FleetAssignment = () => {
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 uppercase font-semibold">Actions</p>
-                      <div className="flex gap-2 mt-1">
+                      <div className="flex gap-3 mt-1">
                         <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
                           onClick={() => handleEditClick(assignment)}
-                          className="px-3 py-1 text-xs bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                          className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
                         >
                           Edit
                         </motion.button>
                         <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
                           onClick={() => handleReturnVehicle(assignment.id)}
-                          className="px-3 py-1 text-xs bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors"
+                          className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
                         >
                           Return
                         </motion.button>
@@ -240,11 +283,11 @@ const FleetAssignment = () => {
                   <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
                     <div>
                       <p className="text-xs text-gray-500 uppercase font-semibold">Vehicle</p>
-                      <p className="text-sm font-bold text-avis-black mt-1">{getVehicleName(assignment.vehicleId)}</p>
+                      <p className="text-sm text-avis-black mt-1">{getVehicleName(assignment.vehicleId)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 uppercase font-semibold">Client</p>
-                      <p className="text-sm font-bold text-avis-black mt-1">{getUserName(assignment.clientId)}</p>
+                      <p className="text-sm text-avis-black mt-1">{getUserName(assignment.clientId)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 uppercase font-semibold">Return Date</p>
@@ -300,34 +343,28 @@ const FleetAssignment = () => {
             </h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle *</label>
-                <select
+                <CustomSelect
+                  label="Vehicle *"
                   value={formData.vehicleId}
-                  onChange={(e) => setFormData({ ...formData, vehicleId: e.target.value })}
-                  className="input-field"
-                >
-                  <option value="">Select a vehicle</option>
-                  {availableVehicles.map(v => (
-                    <option key={v.id} value={v.id}>
-                      {v.registrationNo} - {v.model}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(value) => setFormData({ ...formData, vehicleId: value })}
+                  options={selectableVehicles.map(v => ({
+                    value: v.id,
+                    label: `${v.registrationNo} - ${v.model}`
+                  }))}
+                  placeholder="Select a vehicle"
+                />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Client *</label>
-                <select
+                <CustomSelect
+                  label="Client *"
                   value={formData.clientId}
-                  onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
-                  className="input-field"
-                >
-                  <option value="">Select a client</option>
-                  {clientsData.map(c => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(value) => setFormData({ ...formData, clientId: value })}
+                  options={clientsData.map(c => ({
+                    value: c.id,
+                    label: c.name
+                  }))}
+                  placeholder="Select a client"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Purpose</label>
@@ -342,37 +379,63 @@ const FleetAssignment = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                  <input
-                    type="date"
-                    value={formData.startDate}
-                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                    className="input-field"
+                  <DatePicker
+                    selected={formData.startDate ? new Date(formData.startDate) : null}
+                    onChange={(date) => {
+                      setFormData({ ...formData, startDate: date ? date.toISOString().split('T')[0] : '' })
+                      setStartDateOpen(false)
+                    }}
+                    onInputClick={() => setStartDateOpen(!startDateOpen)}
+                    open={startDateOpen}
+                    onCalendarOpen={() => setStartDateOpen(true)}
+                    onCalendarClose={() => setStartDateOpen(false)}
+                    dateFormat="dd/MM/yyyy"
+                    className="input-field cursor-pointer"
+                    placeholderText="Select start date"
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                  <input
-                    type="date"
-                    value={formData.endDate}
-                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                    className="input-field"
+                  <DatePicker
+                    selected={formData.endDate ? new Date(formData.endDate) : null}
+                    onChange={(date) => {
+                      setFormData({ ...formData, endDate: date ? date.toISOString().split('T')[0] : '' })
+                      setEndDateOpen(false)
+                    }}
+                    onInputClick={() => setEndDateOpen(!endDateOpen)}
+                    open={endDateOpen}
+                    onCalendarOpen={() => setEndDateOpen(true)}
+                    onCalendarClose={() => setEndDateOpen(false)}
+                    dateFormat="dd/MM/yyyy"
+                    className="input-field cursor-pointer"
+                    placeholderText="Select end date"
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
                   />
                 </div>
               </div>
             </div>
             <div className="flex gap-3 mt-8">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setShowModal(false)}
-                className="btn-secondary flex-1"
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200"
               >
                 Cancel
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleSave}
-                className="btn-primary flex-1"
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
               >
                 {editingAssignment ? 'Update' : 'Assign'}
-              </button>
+              </motion.button>
             </div>
           </motion.div>
         </motion.div>

@@ -1,48 +1,18 @@
 import React, { useState, useMemo } from 'react'
-import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, Briefcase, ChevronDown, ChevronUp } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { FaUser } from 'react-icons/fa'
+import KPICard from '../components/KPICard'
+import CustomSelect from '../components/CustomSelect'
+import clientsData from '../data/clients.json'
 
 const Clients = () => {
-  const [clients, setClients] = useState([
-    {
-      id: 'CLI001',
-      name: 'Acme Corporation',
-      email: 'contact@acme.com',
-      phone: '+27-11-100-1000',
-      address: '123 Business Park, Johannesburg',
-      city: 'Johannesburg',
-      industry: 'Technology',
-      status: 'Active',
-      addedDate: '2024-01-15',
-    },
-    {
-      id: 'CLI002',
-      name: 'Global Logistics Ltd',
-      email: 'info@globallogistics.co.za',
-      phone: '+27-21-200-2000',
-      address: '456 Industrial Zone, Cape Town',
-      city: 'Cape Town',
-      industry: 'Logistics',
-      status: 'Active',
-      addedDate: '2024-02-20',
-    },
-    {
-      id: 'CLI003',
-      name: 'Durban Services Inc',
-      email: 'sales@durbanservices.co.za',
-      phone: '+27-31-300-3000',
-      address: '789 Commerce Street, Durban',
-      city: 'Durban',
-      industry: 'Services',
-      status: 'Active',
-      addedDate: '2024-03-10',
-    },
-  ])
+  const [clients, setClients] = useState(clientsData)
 
   const [searchTerm, setSearchTerm] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [editingClient, setEditingClient] = useState(null)
+  const [expandedClientId, setExpandedClientId] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -79,7 +49,8 @@ const Clients = () => {
     setShowModal(true)
   }
 
-  const handleEditClick = (client) => {
+  const handleEditClick = (e, client) => {
+    e.stopPropagation()
     setEditingClient(client)
     setFormData({
       name: client.name,
@@ -118,10 +89,15 @@ const Clients = () => {
     setShowModal(false)
   }
 
-  const handleDelete = (id) => {
+  const handleDelete = (e, id) => {
+    e.stopPropagation()
     if (window.confirm('Are you sure you want to delete this client?')) {
       setClients(clients.filter(c => c.id !== id))
     }
+  }
+
+  const toggleExpand = (id) => {
+    setExpandedClientId(expandedClientId === id ? null : id)
   }
 
   const getStatusColor = (status) => {
@@ -149,15 +125,38 @@ const Clients = () => {
           <h1 className="text-3xl font-bold text-avis-black">Clients</h1>
           <p className="text-gray-500 mt-1">Manage client information and details</p>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <button
           onClick={handleAddClick}
-          className="btn-primary flex items-center gap-2"
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-avis-red to-red-700 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
         >
-          <Plus size={20} />
+          <Plus size={16} />
           Add Client
-        </motion.button>
+        </button>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Total Clients</p>
+            <p className="text-3xl font-bold text-white mt-1">{clients.length}</p>
+          </div>
+          <div className="w-3 h-3 rounded-full bg-avis-red"></div>
+        </div>
+        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Active Clients</p>
+            <p className="text-3xl font-bold text-white mt-1">{clients.filter(c => c.status === 'Active').length}</p>
+          </div>
+          <div className="w-3 h-3 rounded-full bg-avis-red"></div>
+        </div>
+        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Industries</p>
+            <p className="text-3xl font-bold text-white mt-1">{new Set(clients.map(c => c.industry)).size}</p>
+          </div>
+          <div className="w-3 h-3 rounded-full bg-avis-red"></div>
+        </div>
       </div>
 
       {/* Search */}
@@ -175,90 +174,96 @@ const Clients = () => {
         <p className="text-sm text-gray-500 mt-3">Total: {filteredClients.length} client(s)</p>
       </div>
 
-      {/* Clients Grid */}
+      {/* Clients Table */}
       {filteredClients.length === 0 ? (
         <div className="bg-white p-12 rounded-xl shadow-sm border border-gray-100 text-center">
           <FaUser size={48} className="mx-auto text-gray-300 mb-4" />
           <p className="text-gray-500">No clients found</p>
         </div>
       ) : (
-        <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredClients.map((client, index) => (
-            <motion.div
-              key={client.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
-            >
-              {/* Header with status */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-avis-red bg-opacity-20 flex items-center justify-center">
-                    <FaUser className="text-avis-red text-lg" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-avis-black">{client.name}</h3>
-                    <p className="text-xs text-gray-500">{client.industry}</p>
-                  </div>
-                </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(client.status)}`}>
-                  {client.status}
-                </span>
-              </div>
-
-              {/* Contact Details */}
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Mail size={16} className="text-gray-400" />
-                  <a href={`mailto:${client.email}`} className="hover:text-avis-red transition-colors">
-                    {client.email}
-                  </a>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Phone size={16} className="text-gray-400" />
-                  <a href={`tel:${client.phone}`} className="hover:text-avis-red transition-colors">
-                    {client.phone}
-                  </a>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <MapPin size={16} className="text-gray-400" />
-                  <span>{client.city}</span>
-                </div>
-              </div>
-
-              {/* Address */}
-              <div className="bg-gray-50 rounded-lg p-3 mb-4 text-sm text-gray-700">
-                <p className="text-xs text-gray-500 font-semibold mb-1">ADDRESS</p>
-                <p>{client.address}</p>
-              </div>
-
-              {/* Added Date */}
-              <p className="text-xs text-gray-400 mb-4">Added: {client.addedDate}</p>
-
-              {/* Actions */}
-              <div className="flex gap-2">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleEditClick(client)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
-                >
-                  <Edit size={16} />
-                  Edit
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleDelete(client.id)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium"
-                >
-                  <Trash2 size={16} />
-                  Delete
-                </motion.button>
-              </div>
-            </motion.div>
-          ))}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Industry</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Contact</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Location</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredClients.map((client, index) => (
+                  <motion.tr
+                    key={client.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-avis-red/10 flex items-center justify-center">
+                          <FaUser className="text-avis-red text-xs" />
+                        </div>
+                        <span className="text-sm font-medium text-avis-black">{client.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{client.industry}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2 text-xs text-gray-600">
+                          <Mail size={12} /> {client.email}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-gray-600">
+                          <Phone size={12} /> {client.phone}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm text-gray-700">{client.city}</span>
+                        <span className="text-xs text-gray-500">{client.address}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(client.status)}`}>
+                        {client.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={(e) => handleEditClick(e, client)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edit"
+                        >
+                          <Edit size={16} />
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={(e) => handleDelete(e, client.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 size={16} />
+                        </motion.button>
+                      </div>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </motion.div>
       )}
 
@@ -323,7 +328,7 @@ const Clients = () => {
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     className="input-field"
-                    placeholder="+27-11-123-4567"
+                    placeholder="+260-21-123-4567"
                   />
                 </div>
               </div>
@@ -347,36 +352,36 @@ const Clients = () => {
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     className="input-field"
-                    placeholder="e.g., Johannesburg"
+                    placeholder="e.g., Lusaka"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select
+                  <CustomSelect
+                    label="Status"
                     value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="input-field"
-                  >
-                    <option>Active</option>
-                    <option>Inactive</option>
-                    <option>Suspended</option>
-                  </select>
+                    onChange={(value) => setFormData({ ...formData, status: value })}
+                    options={['Active', 'Inactive', 'Suspended']}
+                  />
                 </div>
               </div>
             </div>
             <div className="flex gap-3 mt-8">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setShowModal(false)}
-                className="btn-secondary flex-1"
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200"
               >
                 Cancel
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleSave}
-                className="btn-primary flex-1"
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
               >
                 {editingClient ? 'Update' : 'Add'}
-              </button>
+              </motion.button>
             </div>
           </motion.div>
         </motion.div>

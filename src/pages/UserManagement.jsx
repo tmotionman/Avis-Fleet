@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
-import { Plus, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Edit, Trash2, ChevronLeft, ChevronRight, Users, Shield, Briefcase, CheckCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import usersData from '../data/users.json'
+import KPICard from '../components/KPICard'
+import CustomSelect from '../components/CustomSelect'
 
 const UserManagement = () => {
   const [users, setUsers] = useState(usersData)
@@ -104,37 +106,26 @@ const UserManagement = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <motion.div
-          whileHover={{ y: -5 }}
-          className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
-        >
-          <p className="text-gray-500 text-sm font-medium">Total Users</p>
-          <h3 className="text-3xl font-bold text-avis-black mt-2">{users.length}</h3>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ y: -5 }}
-          className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
-        >
-          <p className="text-gray-500 text-sm font-medium">Admins</p>
-          <h3 className="text-3xl font-bold text-avis-red mt-2">{users.filter(u => u.role === 'Admin').length}</h3>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ y: -5 }}
-          className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
-        >
-          <p className="text-gray-500 text-sm font-medium">Managers</p>
-          <h3 className="text-3xl font-bold text-blue-600 mt-2">{users.filter(u => u.role === 'Manager').length}</h3>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ y: -5 }}
-          className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
-        >
-          <p className="text-gray-500 text-sm font-medium">Active Users</p>
-          <h3 className="text-3xl font-bold text-green-600 mt-2">{users.filter(u => u.status === 'Active').length}</h3>
-        </motion.div>
+        <KPICard 
+          label="Total Users" 
+          value={users.length} 
+          icon={<Users />} 
+        />
+        <KPICard 
+          label="Admins" 
+          value={users.filter(u => u.role === 'Admin').length} 
+          icon={<Shield />} 
+        />
+        <KPICard 
+          label="Managers" 
+          value={users.filter(u => u.role === 'Manager').length} 
+          icon={<Briefcase />} 
+        />
+        <KPICard 
+          label="Active Users" 
+          value={users.filter(u => u.status === 'Active').length} 
+          icon={<CheckCircle />} 
+        />
       </div>
 
       {/* Table */}
@@ -262,7 +253,7 @@ const UserManagement = () => {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="input-field"
-                  placeholder="john@avisfleet.com"
+                  placeholder="john@avisfleet.co.zm"
                 />
               </div>
               <div>
@@ -272,49 +263,43 @@ const UserManagement = () => {
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   className="input-field"
-                  placeholder="+27-11-123-4567"
+                  placeholder="+260-21-123-4567"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <select
+                <CustomSelect
+                  label="Role"
                   value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="input-field"
-                >
-                  <option>Admin</option>
-                  <option>Manager</option>
-                  <option>Employee</option>
-                </select>
+                  onChange={(value) => setFormData({ ...formData, role: value })}
+                  options={['Admin', 'Manager', 'Employee']}
+                />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Region</label>
-                <select
+                <CustomSelect
+                  label="Region"
                   value={formData.region}
-                  onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                  className="input-field"
-                >
-                  <option>All</option>
-                  <option>Johannesburg</option>
-                  <option>Cape Town</option>
-                  <option>Durban</option>
-                  <option>Pretoria</option>
-                </select>
+                  onChange={(value) => setFormData({ ...formData, region: value })}
+                  options={['All', 'Lusaka', 'Ndola', 'Kitwe', 'Livingstone']}
+                />
               </div>
             </div>
             <div className="flex gap-3 mt-8">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setShowModal(false)}
-                className="btn-secondary flex-1"
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200"
               >
                 Cancel
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleSave}
-                className="btn-primary flex-1"
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
               >
                 {editingUser ? 'Update' : 'Add'}
-              </button>
+              </motion.button>
             </div>
           </motion.div>
         </motion.div>

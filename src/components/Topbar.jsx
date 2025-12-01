@@ -1,13 +1,17 @@
-import React, { useState } from 'react'
-import { Menu, Search, Bell, User, LogOut, Settings, ChevronDown } from 'lucide-react'
+import React, { useState, useRef } from 'react'
+import { Menu, Search, Bell, User, LogOut, Settings, ChevronDown, Upload, X } from 'lucide-react'
 import { motion } from 'framer-motion'
 import AvisLogo from '../../assets/Avis.png'
+import CustomSelect from './CustomSelect'
 
 const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
   const [profileOpen, setProfileOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
+  const fileInputRef = useRef(null)
+  const [savedProfilePhoto, setSavedProfilePhoto] = useState(null)
   const [profileData, setProfileData] = useState({
     name: currentUser?.name || 'User',
     email: currentUser?.email || '',
@@ -15,6 +19,7 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
     phone: '+27-11-123-4567',
     department: 'Operations',
     joinDate: '2024-01-15',
+    profilePhoto: null,
   })
   const [settings, setSettings] = useState({
     emailNotifications: true,
@@ -31,6 +36,9 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
   ]
 
   const handleProfileSave = () => {
+    if (profileData.profilePhoto) {
+      setSavedProfilePhoto(profileData.profilePhoto)
+    }
     setShowProfileModal(false)
   }
 
@@ -38,12 +46,57 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
     setShowSettingsModal(false)
   }
 
+  const handleFileSelect = (file) => {
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setProfileData({ ...profileData, profilePhoto: e.target.result })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleDrag = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true)
+    } else if (e.type === 'dragleave') {
+      setDragActive(false)
+    }
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+    
+    const files = e.dataTransfer.files
+    if (files && files[0]) {
+      handleFileSelect(files[0])
+    }
+  }
+
+  const handleInputChange = (e) => {
+    const files = e.target.files
+    if (files && files[0]) {
+      handleFileSelect(files[0])
+    }
+  }
+
+  const removeProfilePhoto = () => {
+    setProfileData({ ...profileData, profilePhoto: null })
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
   // Profile Modal Component
   const ProfileModal = () => (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">My Profile</h2>
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">My Profile</h2>
           <button
             onClick={() => setShowProfileModal(false)}
             className="text-gray-400 hover:text-gray-600"
@@ -51,76 +104,137 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
             ✕
           </button>
         </div>
-        <div className="p-6 space-y-4">
+        <div className="p-4 space-y-3">
+          {/* Profile Photo Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Profile Photo</label>
+            <div
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+              className={`relative border-2 border-dashed rounded-lg p-3 text-center transition-colors ${
+                dragActive 
+                  ? 'border-avis-red bg-red-50' 
+                  : 'border-gray-300 hover:border-avis-red'
+              }`}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleInputChange}
+                className="hidden"
+              />
+              
+              {profileData.profilePhoto ? (
+                <div className="space-y-2">
+                  <div className="w-20 h-20 mx-auto rounded-lg overflow-hidden border border-gray-200">
+                    <img 
+                      src={profileData.profilePhoto} 
+                      alt="Profile Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={removeProfilePhoto}
+                    className="flex items-center justify-center gap-2 w-full px-3 py-1.5 text-xs font-medium text-avis-red border border-avis-red rounded-lg hover:bg-red-50 transition-colors"
+                  >
+                    <X size={12} />
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="cursor-pointer space-y-1 py-2"
+                >
+                  <Upload size={20} className="mx-auto text-gray-400" />
+                  <div>
+                    <p className="text-xs font-medium text-gray-700">Drag photo or click</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Full Name</label>
             <input
               type="text"
               value={profileData.name}
               onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
             <input
               type="email"
               value={profileData.email}
               onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-            <input
-              type="tel"
-              value={profileData.phone}
-              onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Phone</label>
+              <input
+                type="tel"
+                value={profileData.phone}
+                onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Department</label>
+              <input
+                type="text"
+                value={profileData.department}
+                onChange={(e) => setProfileData({ ...profileData, department: e.target.value })}
+                className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-            <input
-              type="text"
-              value={profileData.role}
-              onChange={(e) => setProfileData({ ...profileData, role: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-              disabled
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-            <input
-              type="text"
-              value={profileData.department}
-              onChange={(e) => setProfileData({ ...profileData, department: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Join Date</label>
-            <input
-              type="text"
-              value={profileData.joinDate}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600"
-              disabled
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Role</label>
+              <input
+                type="text"
+                value={profileData.role}
+                className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-gray-50 text-gray-600"
+                disabled
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Join Date</label>
+              <input
+                type="text"
+                value={profileData.joinDate}
+                className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-gray-50 text-gray-600"
+                disabled
+              />
+            </div>
           </div>
         </div>
-        <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
-          <button
+        <div className="flex justify-end gap-3 p-4 border-t border-gray-200">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setShowProfileModal(false)}
-            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200"
           >
             Cancel
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleProfileSave}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            className="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
           >
             Save Changes
-          </button>
+          </motion.button>
         </div>
       </div>
     </div>
@@ -169,16 +283,17 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
-            <select
+            <CustomSelect
+              options={[
+                { value: 'English', label: 'English' },
+                { value: 'Français', label: 'Français' },
+                { value: 'Español', label: 'Español' },
+                { value: 'Portuguese', label: 'Portuguese' },
+              ]}
               value={settings.language}
-              onChange={(e) => setSettings({ ...settings, language: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-            >
-              <option>English</option>
-              <option>Français</option>
-              <option>Español</option>
-              <option>Portuguese</option>
-            </select>
+              onChange={(value) => setSettings({ ...settings, language: value })}
+              placeholder="Select Language"
+            />
           </div>
           <div className="flex items-center justify-between pt-2">
             <label className="text-sm font-medium text-gray-700">Dark Mode</label>
@@ -197,18 +312,22 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
           </div>
         </div>
         <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setShowSettingsModal(false)}
-            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-4 py-2.5 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200"
           >
             Cancel
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleSettingsSave}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            className="px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
           >
             Save Changes
-          </button>
+          </motion.button>
         </div>
       </div>
     </div>
@@ -286,9 +405,15 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
             onClick={() => setProfileOpen(!profileOpen)}
             className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-all"
           >
-            <div className="w-8 h-8 bg-avis-red rounded-full flex items-center justify-center text-white font-bold text-sm">
-              {currentUser.name.charAt(0)}
-            </div>
+            {savedProfilePhoto ? (
+              <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
+                <img src={savedProfilePhoto} alt="Profile" className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="w-8 h-8 bg-avis-red rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                {currentUser.name.charAt(0)}
+              </div>
+            )}
             <ChevronDown size={18} className="text-gray-600" />
           </button>
 
@@ -319,16 +444,6 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
                 >
                   <User size={16} />
                   <span>My Profile</span>
-                </button>
-                <button 
-                  onClick={() => {
-                    setShowSettingsModal(true)
-                    setProfileOpen(false)
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors text-sm text-gray-700"
-                >
-                  <Settings size={16} />
-                  <span>Settings</span>
                 </button>
               </div>
               <div className="p-2 border-t border-gray-200">

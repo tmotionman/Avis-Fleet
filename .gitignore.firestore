@@ -1,0 +1,14 @@
+# Firebase service account key (NEVER commit this!)
+serviceAccountKey.json
+firebase-key-*.json
+
+# Firebase emulator data
+.firebase/
+.firebaserc
+
+# Firebase hosting cache
+.firebaserc
+
+# Emulator logs
+firebase-debug.log
+firestore-debug.log

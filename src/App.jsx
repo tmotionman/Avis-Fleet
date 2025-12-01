@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import Sidebar from './components/Sidebar'
 import Topbar from './components/Topbar'
@@ -9,6 +9,8 @@ import FleetAssignment from './pages/FleetAssignment'
 import Clients from './pages/Clients'
 import Reports from './pages/Reports'
 import UserManagement from './pages/UserManagement'
+import Help from './pages/Help'
+import vehiclesData from './data/vehicles.json'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -30,6 +32,100 @@ function App() {
       return null
     }
   })
+
+  // Centralized vehicle state - persisted to localStorage
+  const [vehicles, setVehicles] = useState(() => {
+    try {
+      const saved = localStorage.getItem('avis_vehicles')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        // Migration: Update old statuses to new ones
+        return parsed.map(v => ({
+          ...v,
+          status: v.status === 'Active' ? 'Available' : 
+                 v.status === 'In Service' ? 'On Rent' : 
+                 v.status === 'Retired' ? 'Maintenance' : v.status
+        }))
+      }
+      // Clear old localStorage data on first load with new data
+      localStorage.removeItem('avis_vehicles')
+      return vehiclesData
+    } catch (e) {
+      localStorage.removeItem('avis_vehicles')
+      return vehiclesData
+    }
+  })
+
+  // Centralized assignments state - persisted to localStorage
+  const [assignments, setAssignments] = useState(() => {
+    try {
+      const saved = localStorage.getItem('avis_assignments')
+      return saved ? JSON.parse(saved) : []
+    } catch (e) {
+      return []
+    }
+  })
+
+  // Persist vehicles to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('avis_vehicles', JSON.stringify(vehicles))
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [vehicles])
+
+  // Persist assignments to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('avis_assignments', JSON.stringify(assignments))
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [assignments])
+
+  // Handler: Assign vehicle to client (changes status to "On Rent")
+  const handleAssignVehicle = (assignment) => {
+    // Update vehicle status to "On Rent"
+    setVehicles(prev => prev.map(v => 
+      v.id === assignment.vehicleId 
+        ? { ...v, status: 'On Rent', assignedTo: assignment.clientName || 'Assigned' }
+        : v
+    ))
+    // Add assignment
+    setAssignments(prev => [...prev, assignment])
+  }
+
+  // Handler: Return vehicle (changes status back to "Available")
+  const handleReturnVehicle = (assignmentId) => {
+    const assignment = assignments.find(a => a.id === assignmentId)
+    if (assignment) {
+      // Update vehicle status back to "Available"
+      setVehicles(prev => prev.map(v => 
+        v.id === assignment.vehicleId 
+          ? { ...v, status: 'Available', assignedTo: 'Unassigned' }
+          : v
+      ))
+      // Mark assignment as returned
+      setAssignments(prev => prev.map(a =>
+        a.id === assignmentId
+          ? { ...a, returnDate: new Date().toISOString().split('T')[0] }
+          : a
+      ))
+    }
+  }
+
+  // Handler: Update assignment details
+  const handleUpdateAssignment = (assignmentId, updates) => {
+    setAssignments(prev => prev.map(a =>
+      a.id === assignmentId ? { ...a, ...updates } : a
+    ))
+  }
+
+  // Handler: Delete assignment
+  const handleDeleteAssignment = (assignmentId) => {
+    setAssignments(prev => prev.filter(a => a.id !== assignmentId))
+  }
 
   const handleLogin = (userData) => {
     setCurrentUser(userData)
@@ -62,19 +158,36 @@ function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard':
-        return <Dashboard />
+        return (
+          <Dashboard 
+            vehicles={vehicles} 
+            assignments={assignments} 
+            onNavigate={setCurrentPage} 
+          />
+        )
       case 'fleet':
-        return <FleetList />
+        return <FleetList vehicles={vehicles} setVehicles={setVehicles} />
       case 'assignment':
-        return <FleetAssignment />
+        return (
+          <FleetAssignment 
+            vehicles={vehicles}
+            assignments={assignments}
+            onAssignVehicle={handleAssignVehicle}
+            onReturnVehicle={handleReturnVehicle}
+            onUpdateAssignment={handleUpdateAssignment}
+            onDeleteAssignment={handleDeleteAssignment}
+          />
+        )
       case 'clients':
         return <Clients />
       case 'reports':
-        return <Reports />
+        return <Reports vehicles={vehicles} assignments={assignments} />
       case 'users':
         return <UserManagement />
+      case 'help':
+        return <Help />
       default:
-        return <Dashboard />
+        return <Dashboard vehicles={vehicles} />
     }
   }
 
