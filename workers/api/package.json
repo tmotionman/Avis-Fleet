@@ -1,0 +1,22 @@
+{
+  "name": "avis-fleet-api",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker API for Avis Fleet Management System",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:preview": "wrangler deploy --env preview",
+    "db:create": "wrangler d1 create avis-fleet-db",
+    "db:schema": "wrangler d1 execute avis-fleet-db --file=../../db/d1-schema.sql",
+    "db:seed": "wrangler d1 execute avis-fleet-db --file=../../db/d1-seed.sql",
+    "db:schema:local": "wrangler d1 execute avis-fleet-db --file=../../db/d1-schema.sql --local",
+    "db:seed:local": "wrangler d1 execute avis-fleet-db --file=../../db/d1-seed.sql --local"
+  },
+  "keywords": ["cloudflare", "workers", "d1", "fleet-management"],
+  "author": "Avis Fleet",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

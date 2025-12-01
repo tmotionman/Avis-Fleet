@@ -1,0 +1,29 @@
+# Cloudflare Workers configuration for Avis Fleet API
+name = "avis-fleet-api"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "avis-fleet-db"
+database_id = "YOUR_DATABASE_ID_HERE"  # Replace after creating database
+
+# Environment variables
+[vars]
+ENVIRONMENT = "production"
+CORS_ORIGIN = "https://avis-fleet.pages.dev"  # Update with your Pages URL
+
+# Development settings
+[env.dev]
+name = "avis-fleet-api-dev"
+[env.dev.vars]
+ENVIRONMENT = "development"
+CORS_ORIGIN = "*"
+
+# Preview/staging settings
+[env.preview]
+name = "avis-fleet-api-preview"
+[env.preview.vars]
+ENVIRONMENT = "preview"
+CORS_ORIGIN = "*"
