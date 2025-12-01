@@ -161,6 +161,9 @@ export default {
       if (path === '/api/auth/login' && method === 'POST') {
         return await loginUser(request, env.DB, allowedOrigin, allowedOrigins);
       }
+      if (path === '/api/auth/signup' && method === 'POST') {
+        return await signupUser(request, env.DB, allowedOrigin, allowedOrigins);
+      }
 
       // ============== DASHBOARD STATS ==============
       if (path === '/api/stats' && method === 'GET') {
@@ -577,6 +580,41 @@ async function loginUser(request, db, allowedOrigin, allowedOrigins) {
     ...user,
     message: 'Login successful'
   }, 200, allowedOrigin, allowedOrigins);
+}
+
+async function signupUser(request, db, allowedOrigin, allowedOrigins) {
+  const { name, email, password } = await request.json();
+  
+  if (!name || !email || !password) {
+    return errorResponse('Name, email, and password are required', 400, allowedOrigin, allowedOrigins);
+  }
+  
+  // Check if user already exists
+  const existingUser = await db.prepare(`
+    SELECT id FROM users WHERE email = ?
+  `).bind(email).first();
+  
+  if (existingUser) {
+    return errorResponse('User with this email already exists', 409, allowedOrigin, allowedOrigins);
+  }
+  
+  // Create new user
+  const id = generateId('USR');
+  try {
+    await db.prepare(`
+      INSERT INTO users (id, name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)
+    `).bind(id, name, email, password, 'User').run();
+    
+    return jsonResponse({
+      id,
+      name,
+      email,
+      role: 'User',
+      message: 'User created successfully'
+    }, 201, allowedOrigin, allowedOrigins);
+  } catch (error) {
+    return errorResponse('Failed to create user: ' + error.message, 500, allowedOrigin, allowedOrigins);
+  }
 }
 
 // ============== DASHBOARD STATS ==============

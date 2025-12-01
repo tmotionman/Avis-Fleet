@@ -120,6 +120,11 @@ export const usersApi = {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   }),
+  
+  signup: (name, email, password) => apiFetch('/api/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify({ name, email, password }),
+  }),
 };
 
 // ============== DASHBOARD ==============

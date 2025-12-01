@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaUser } from 'react-icons/fa'
+import { usersApi } from '../lib/d1Client'
 import bg1600Avif from '../../assets/bg-1600.avif'
 import bg800Avif from '../../assets/bg-800.avif'
 import bg400Avif from '../../assets/bg-400.avif'
@@ -25,29 +26,18 @@ const Login = ({ onLogin, onSignup }) => {
     setError('')
     setIsLoading(true)
 
-    // Simulate auth delay
-    setTimeout(() => {
-      if (!email || !password) {
-        setError('Please enter both email and password')
-        setIsLoading(false)
-        return
-      }
-
-      if (!email.includes('@')) {
-        setError('Please enter a valid email address')
-        setIsLoading(false)
-        return
-      }
-
-      // Mock successful login
-      onLogin({
-        id: 'USR001',
-        name: email.split('@')[0],
-        email: email,
-        role: 'Admin',
-        isNewUser: false,
+    // Call login API
+    usersApi.login(email, password)
+      .then(userData => {
+        onLogin({
+          ...userData,
+          isNewUser: false,
+        })
       })
-    }, 1000)
+      .catch(err => {
+        setError(err.message || 'Login failed')
+        setIsLoading(false)
+      })
   }
 
   const handleSignup = (e) => {
@@ -55,42 +45,43 @@ const Login = ({ onLogin, onSignup }) => {
     setError('')
     setIsLoading(true)
 
-    // Simulate signup delay
-    setTimeout(() => {
-      if (!name || !email || !password || !confirmPassword) {
-        setError('Please fill in all fields')
-        setIsLoading(false)
-        return
-      }
+    // Validate fields
+    if (!name || !email || !password || !confirmPassword) {
+      setError('Please fill in all fields')
+      setIsLoading(false)
+      return
+    }
 
-      if (!email.includes('@')) {
-        setError('Please enter a valid email address')
-        setIsLoading(false)
-        return
-      }
+    if (!email.includes('@')) {
+      setError('Please enter a valid email address')
+      setIsLoading(false)
+      return
+    }
 
-      if (password.length < 6) {
-        setError('Password must be at least 6 characters')
-        setIsLoading(false)
-        return
-      }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters')
+      setIsLoading(false)
+      return
+    }
 
-      if (password !== confirmPassword) {
-        setError('Passwords do not match')
-        setIsLoading(false)
-        return
-      }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      setIsLoading(false)
+      return
+    }
 
-      // Create new user with isNewUser flag for onboarding
-      const newUserId = 'USR' + Date.now().toString().slice(-6)
-      onSignup({
-        id: newUserId,
-        name: name,
-        email: email,
-        role: 'Admin',
-        isNewUser: true,
+    // Call signup API
+    usersApi.signup(name, email, password)
+      .then(userData => {
+        onSignup({
+          ...userData,
+          isNewUser: true,
+        })
       })
-    }, 1000)
+      .catch(err => {
+        setError(err.message || 'Signup failed')
+        setIsLoading(false)
+      })
   }
 
   const switchMode = () => {
