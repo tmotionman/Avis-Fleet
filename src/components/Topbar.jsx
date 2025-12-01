@@ -3,9 +3,10 @@ import { Menu, Search, Bell, User, LogOut, Settings, ChevronDown, Upload, X } fr
 import { motion } from 'framer-motion'
 import AvisLogoWebp from '../assets/Avis.webp'
 import CustomSelect from './CustomSelect'
+import { usersApi } from '../lib/d1Client'
 
 // Profile Modal Component - Extracted to prevent re-mounting on parent re-render
-const ProfileModal = ({ showProfileModal, setShowProfileModal, profileData, setProfileData, dragActive, setDragActive, fileInputRef, handleDrag, handleDrop, handleInputChange, removeProfilePhoto, handleProfileSave }) => {
+const ProfileModal = ({ showProfileModal, setShowProfileModal, profileData, setProfileData, dragActive, setDragActive, fileInputRef, handleDrag, handleDrop, handleInputChange, removeProfilePhoto, handleProfileSave, isSaving }) => {
   if (!showProfileModal) return null
 
   return (
@@ -147,7 +148,8 @@ const ProfileModal = ({ showProfileModal, setShowProfileModal, profileData, setP
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowProfileModal(false)}
-            className="px-4 py-2 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200"
+            disabled={isSaving}
+            className="px-4 py-2 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200 disabled:opacity-50"
           >
             Cancel
           </motion.button>
@@ -155,9 +157,10 @@ const ProfileModal = ({ showProfileModal, setShowProfileModal, profileData, setP
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleProfileSave}
-            className="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+            disabled={isSaving}
+            className="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50"
           >
-            Save Changes
+            {isSaving ? 'Saving...' : 'Save Changes'}
           </motion.button>
         </div>
       </div>
@@ -270,15 +273,16 @@ const SettingsModal = ({ showSettingsModal, setShowSettingsModal, settings, setS
   )
 }
 
-const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
+const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileUpdate }) => {
   const [profileOpen, setProfileOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [dragActive, setDragActive] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const fileInputRef = useRef(null)
   const modalContentRef = useRef(null)
-  const [savedProfilePhoto, setSavedProfilePhoto] = useState(null)
+  const [savedProfilePhoto, setSavedProfilePhoto] = useState(currentUser?.avatarUrl || null)
   const [profileData, setProfileData] = useState({
     name: currentUser?.name || 'User',
     email: currentUser?.email || '',
@@ -286,7 +290,7 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
     phone: '+27-11-123-4567',
     department: 'Operations',
     joinDate: '2024-01-15',
-    profilePhoto: null,
+    profilePhoto: currentUser?.avatarUrl || null,
   })
   const [settings, setSettings] = useState({
     emailNotifications: true,
@@ -302,11 +306,50 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
     { id: 3, message: 'New user registration pending approval', priority: 'low' },
   ]
 
-  const handleProfileSave = () => {
-    if (profileData.profilePhoto) {
+  const handleProfileSave = async () => {
+    setIsSaving(true)
+    try {
+      const userId = currentUser?.id || currentUser?.email
+      if (!userId) {
+        console.error('No user ID available')
+        setShowProfileModal(false)
+        return
+      }
+      
+      // Prepare update data
+      const updateData = {
+        name: profileData.name,
+        email: profileData.email,
+        avatarUrl: profileData.profilePhoto, // Base64 or URL
+      }
+      
+      // Call API to update profile
+      const updatedUser = await usersApi.updateProfile(userId, updateData)
+      
+      // Update local state
       setSavedProfilePhoto(profileData.profilePhoto)
+      
+      // Update localStorage and parent state
+      const newUserData = {
+        ...currentUser,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        avatarUrl: updatedUser.avatarUrl,
+      }
+      localStorage.setItem('avis_currentUser', JSON.stringify(newUserData))
+      
+      // Notify parent to update currentUser state
+      if (onProfileUpdate) {
+        onProfileUpdate(newUserData)
+      }
+      
+      setShowProfileModal(false)
+    } catch (error) {
+      console.error('Failed to save profile:', error)
+      alert('Failed to save profile. Please try again.')
+    } finally {
+      setIsSaving(false)
     }
-    setShowProfileModal(false)
   }
 
   const handleSettingsSave = () => {
@@ -503,6 +546,7 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout }) => {
         handleInputChange={handleInputChange}
         removeProfilePhoto={removeProfilePhoto}
         handleProfileSave={handleProfileSave}
+        isSaving={isSaving}
       />
       <SettingsModal 
         showSettingsModal={showSettingsModal}

@@ -107,21 +107,23 @@ export const assignmentsApi = {
 
 // ============== MAINTENANCE ==============
 export const maintenanceApi = {
-  getAll: () => apiFetch('/api/maintenance'),
+  getAll: (userId) => userId
+    ? apiFetch(`/api/maintenance?userId=${userId}`)
+    : apiFetch('/api/maintenance'),
   
-  create: (data) => apiFetch('/api/maintenance', {
+  create: (data, userId) => apiFetch('/api/maintenance', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, userId }),
   }),
   
-  update: (id, data) => apiFetch(`/api/maintenance/${id}`, {
+  update: (id, data, userId) => apiFetch(`/api/maintenance/${id}`, {
     method: 'PUT',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, userId }),
   }),
   
-  delete: (id) => apiFetch(`/api/maintenance/${id}`, {
-    method: 'DELETE',
-  }),
+  delete: (id, userId) => userId
+    ? apiFetch(`/api/maintenance/${id}?userId=${userId}`, { method: 'DELETE' })
+    : apiFetch(`/api/maintenance/${id}`, { method: 'DELETE' }),
 };
 
 // ============== USERS ==============
@@ -136,6 +138,11 @@ export const usersApi = {
   signup: (name, email, password) => apiFetch('/api/auth/signup', {
     method: 'POST',
     body: JSON.stringify({ name, email, password }),
+  }),
+  
+  updateProfile: (id, data) => apiFetch(`/api/users/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
   }),
 };
 

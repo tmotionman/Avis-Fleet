@@ -378,7 +378,13 @@ function App() {
       {/* Main Content with left margin for always-expanded sidebar */}
       <div className="flex flex-col min-h-screen justify-start pt-16 lg:ml-64">
         {/* Topbar */}
-        <Topbar currentUser={currentUser} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} onLogout={handleLogout} />
+        <Topbar 
+          currentUser={currentUser} 
+          sidebarOpen={sidebarOpen} 
+          setSidebarOpen={setSidebarOpen} 
+          onLogout={handleLogout}
+          onProfileUpdate={setCurrentUser}
+        />
 
         {/* Page Content */}
         <main className="flex-1 overflow-auto min-h-0">

@@ -149,7 +149,7 @@ export default {
 
       // ============== MAINTENANCE ==============
       if (path === '/api/maintenance' && method === 'GET') {
-        return await getMaintenanceRecords(env.DB, allowedOrigin, allowedOrigins);
+        return await getMaintenanceRecords(url, env.DB, allowedOrigin, allowedOrigins);
       }
       if (path === '/api/maintenance' && method === 'POST') {
         return await createMaintenanceRecord(request, env.DB, allowedOrigin, allowedOrigins);
@@ -160,7 +160,7 @@ export default {
       }
       if (path.match(/^\/api\/maintenance\/[\w-]+$/) && method === 'DELETE') {
         const id = path.split('/').pop();
-        return await deleteMaintenanceRecord(id, env.DB, allowedOrigin, allowedOrigins);
+        return await deleteMaintenanceRecord(id, url, env.DB, allowedOrigin, allowedOrigins);
       }
 
       // ============== USERS ==============
@@ -173,10 +173,15 @@ export default {
       if (path === '/api/auth/signup' && method === 'POST') {
         return await signupUser(request, env.DB, allowedOrigin, allowedOrigins);
       }
+      // Update user profile (PUT /api/users/:id)
+      if (path.startsWith('/api/users/') && method === 'PUT') {
+        const id = path.split('/')[3];
+        return await updateUserProfile(id, request, env.DB, allowedOrigin, allowedOrigins);
+      }
 
       // ============== DASHBOARD STATS ==============
       if (path === '/api/stats' && method === 'GET') {
-        return await getDashboardStats(env.DB, allowedOrigin, allowedOrigins);
+        return await getDashboardStats(url, env.DB, allowedOrigin, allowedOrigins);
       }
 
       // Health check
@@ -602,8 +607,10 @@ async function deleteAssignment(id, url, db, allowedOrigin, allowedOrigins) {
 }
 
 // ============== MAINTENANCE HANDLERS ==============
-async function getMaintenanceRecords(db, allowedOrigin, allowedOrigins) {
-  const { results } = await db.prepare(`
+async function getMaintenanceRecords(url, db, allowedOrigin, allowedOrigins) {
+  const userId = url.searchParams.get('userId');
+  
+  let query = `
     SELECT 
       m.id, m.vehicle_id as vehicleId, m.service_type as serviceType,
       m.description, m.cost, m.service_date as serviceDate,
@@ -611,9 +618,18 @@ async function getMaintenanceRecords(db, allowedOrigin, allowedOrigins) {
       m.performed_by as performedBy, m.status,
       v.registration_no as vehicleRegistration, v.model as vehicleModel
     FROM maintenance_records m
-    LEFT JOIN vehicles v ON m.vehicle_id = v.id
-    ORDER BY m.service_date DESC
-  `).all();
+    LEFT JOIN vehicles v ON m.vehicle_id = v.id`;
+  
+  if (userId) {
+    query += ` WHERE m.user_id = ?`;
+  }
+  
+  query += ` ORDER BY m.service_date DESC`;
+  
+  const { results } = userId 
+    ? await db.prepare(query).bind(userId).all()
+    : await db.prepare(query).all();
+  
   return jsonResponse(results, 200, allowedOrigin, allowedOrigins);
 }
 
@@ -622,8 +638,8 @@ async function createMaintenanceRecord(request, db, allowedOrigin, allowedOrigin
   const id = generateId('MNT');
   
   await db.prepare(`
-    INSERT INTO maintenance_records (id, vehicle_id, service_type, description, cost, service_date, next_service_date, odometer_reading, performed_by, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO maintenance_records (id, vehicle_id, service_type, description, cost, service_date, next_service_date, odometer_reading, performed_by, status, user_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).bind(
     id,
     data.vehicleId,
@@ -634,7 +650,8 @@ async function createMaintenanceRecord(request, db, allowedOrigin, allowedOrigin
     data.nextServiceDate || null,
     data.odometerReading || null,
     data.performedBy || null,
-    data.status || 'Completed'
+    data.status || 'Completed',
+    data.userId || null
   ).run();
   
   // Update vehicle status if maintenance is in progress
@@ -647,6 +664,15 @@ async function createMaintenanceRecord(request, db, allowedOrigin, allowedOrigin
 
 async function updateMaintenanceRecord(id, request, db, allowedOrigin, allowedOrigins) {
   const data = await request.json();
+  const userId = data.userId;
+  
+  // Build WHERE clause with userId if provided
+  let whereClause = 'id = ?';
+  const whereParams = [id];
+  if (userId) {
+    whereClause = 'id = ? AND user_id = ?';
+    whereParams.push(userId);
+  }
   
   await db.prepare(`
     UPDATE maintenance_records SET
@@ -660,7 +686,7 @@ async function updateMaintenanceRecord(id, request, db, allowedOrigin, allowedOr
       performed_by = COALESCE(?, performed_by),
       status = COALESCE(?, status),
       updated_at = datetime('now')
-    WHERE id = ?
+    WHERE ${whereClause}
   `).bind(
     data.vehicleId || null,
     data.serviceType || null,
@@ -671,23 +697,39 @@ async function updateMaintenanceRecord(id, request, db, allowedOrigin, allowedOr
     data.odometerReading || null,
     data.performedBy || null,
     data.status || null,
-    id
+    ...whereParams
   ).run();
   
-  // Update vehicle status based on maintenance status
+  // Update vehicle status based on maintenance status (also scoped by user)
   if (data.vehicleId) {
+    let vehicleWhere = 'id = ?';
+    let vehicleParams = [data.vehicleId];
+    if (userId) {
+      vehicleWhere = 'id = ? AND user_id = ?';
+      vehicleParams.push(userId);
+    }
+    
     if (data.status === 'Completed') {
-      await db.prepare(`UPDATE vehicles SET status = 'Available', last_service_date = date('now') WHERE id = ?`).bind(data.vehicleId).run();
+      await db.prepare(`UPDATE vehicles SET status = 'Available', last_service_date = date('now') WHERE ${vehicleWhere}`).bind(...vehicleParams).run();
     } else if (data.status === 'In Progress') {
-      await db.prepare(`UPDATE vehicles SET status = 'Maintenance' WHERE id = ?`).bind(data.vehicleId).run();
+      await db.prepare(`UPDATE vehicles SET status = 'Maintenance' WHERE ${vehicleWhere}`).bind(...vehicleParams).run();
     }
   }
   
   return jsonResponse({ id, message: 'Maintenance record updated successfully' }, 200, allowedOrigin, allowedOrigins);
 }
 
-async function deleteMaintenanceRecord(id, db, allowedOrigin, allowedOrigins) {
-  await db.prepare('DELETE FROM maintenance_records WHERE id = ?').bind(id).run();
+async function deleteMaintenanceRecord(id, url, db, allowedOrigin, allowedOrigins) {
+  const userId = new URL(url).searchParams.get('userId');
+  let query = 'DELETE FROM maintenance_records WHERE id = ?';
+  const params = [id];
+  
+  if (userId) {
+    query = 'DELETE FROM maintenance_records WHERE id = ? AND user_id = ?';
+    params.push(userId);
+  }
+  
+  await db.prepare(query).bind(...params).run();
   return jsonResponse({ message: 'Maintenance record deleted successfully' }, 200, allowedOrigin, allowedOrigins);
 }
 
@@ -767,6 +809,61 @@ async function signupUser(request, db, allowedOrigin, allowedOrigins) {
     }, 201, allowedOrigin, allowedOrigins);
   } catch (error) {
     return errorResponse('Failed to create user: ' + error.message, 500, allowedOrigin, allowedOrigins);
+  }
+}
+
+async function updateUserProfile(id, request, db, allowedOrigin, allowedOrigins) {
+  const data = await request.json();
+  
+  // Build update query dynamically based on provided fields
+  const updates = [];
+  const values = [];
+  
+  if (data.name !== undefined) {
+    updates.push('name = ?');
+    values.push(data.name);
+  }
+  if (data.email !== undefined) {
+    updates.push('email = ?');
+    values.push(data.email);
+  }
+  if (data.avatarUrl !== undefined) {
+    updates.push('avatar_url = ?');
+    values.push(data.avatarUrl);
+  }
+  if (data.role !== undefined) {
+    updates.push('role = ?');
+    values.push(data.role);
+  }
+  
+  if (updates.length === 0) {
+    return errorResponse('No fields to update', 400, allowedOrigin, allowedOrigins);
+  }
+  
+  updates.push('updated_at = datetime(\'now\')');
+  values.push(id);
+  
+  try {
+    await db.prepare(`
+      UPDATE users SET ${updates.join(', ')} WHERE id = ?
+    `).bind(...values).run();
+    
+    // Fetch updated user data
+    const row = await db.prepare(`
+      SELECT id, name, email, role, avatar_url as avatarUrl
+      FROM users WHERE id = ?
+    `).bind(id).first();
+    
+    if (!row) {
+      return errorResponse('User not found', 404, allowedOrigin, allowedOrigins);
+    }
+    
+    return jsonResponse({
+      ...row,
+      message: 'Profile updated successfully'
+    }, 200, allowedOrigin, allowedOrigins);
+  } catch (error) {
+    return errorResponse('Failed to update profile: ' + error.message, 500, allowedOrigin, allowedOrigins);
   }
 }
 
