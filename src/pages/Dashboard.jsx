@@ -33,17 +33,9 @@ const Dashboard = ({ vehicles, assignments = [], onNavigate }) => {
 
   // Recent Activity
   const recentActivity = useMemo(() => {
-    const dummyActivities = [
-      { clientName: 'Zamtel Communications', assignedDate: '2025-11-30', purpose: 'Network Maintenance' },
-      { clientName: 'Zambia Copper Supplies', assignedDate: '2025-11-29', purpose: 'Site Inspection' },
-      { clientName: 'Livingstone Tourism Board', assignedDate: '2025-11-28', purpose: 'Guest Transport' },
-      { clientName: 'ZESCO Distribution Ltd', assignedDate: '2025-11-27', purpose: 'Official Use' },
-    ]
-    
-    const allActivities = [...assignments, ...dummyActivities]
-    
-    return allActivities
-      .sort((a, b) => new Date(b.assignedDate) - new Date(a.assignedDate))
+    // Use only real assignments from database (no dummy data)
+    return assignments
+      .sort((a, b) => new Date(b.assignedDate || b.createdAt || 0) - new Date(a.assignedDate || a.createdAt || 0))
       .slice(0, 10)
   }, [assignments])
 
