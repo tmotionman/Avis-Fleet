@@ -7,7 +7,7 @@ compatibility_date = "2024-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "avis-fleet-db"
-database_id = "YOUR_DATABASE_ID_HERE"  # Replace after creating database
+database_id = "419bed2e-153e-45f6-bd7b-8a815a772a7f"
 
 # Environment variables
 [vars]

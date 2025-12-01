@@ -4,7 +4,7 @@
  */
 
 // API Base URL - Update this after deploying your worker
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://avis-fleet-api.YOUR_SUBDOMAIN.workers.dev';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://avis-fleet-api.twizasimwanza.workers.dev';
 
 // Generic fetch wrapper with error handling
 async function apiFetch(endpoint, options = {}) {
