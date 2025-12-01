@@ -52,6 +52,9 @@ function App() {
   // Centralized assignments state - fetched from D1 database
   const [assignments, setAssignments] = useState([])
 
+  // Centralized users state
+  const [users, setUsers] = useState([])
+
   // Fetch all data from D1 database on mount
   useEffect(() => {
     const fetchData = async () => {
