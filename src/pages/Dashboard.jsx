@@ -190,54 +190,6 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
         </motion.div>
         {/* Left Column - Alerts & Location Chart */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Vehicles by Location Chart */}
-          <motion.div variants={itemVariants} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-avis-black mb-4">Vehicles by Location</h3>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={locationData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#E41E26" stopOpacity={1}/>
-                      <stop offset="100%" stopColor="#E41E26" stopOpacity={0.6}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: '#6B7280', fontSize: 12, fontWeight: 500 }} 
-                    dy={10}
-                  />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: '#6B7280', fontSize: 12 }} 
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#1F2937', 
-                      border: 'none', 
-                      borderRadius: '8px', 
-                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                      color: '#F3F4F6'
-                    }}
-                    itemStyle={{ color: '#F3F4F6' }}
-                    cursor={{ fill: '#F9FAFB', opacity: 0.5 }}
-                  />
-                  <Bar 
-                    dataKey="count" 
-                    fill="url(#barGradient)" 
-                    radius={[6, 6, 0, 0]} 
-                    name="Vehicles" 
-                    barSize={40}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.div>
-
           {/* Clients by City Chart */}
           <motion.div variants={itemVariants} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h3 className="text-lg font-semibold text-avis-black mb-4">Clients by City</h3>
@@ -246,8 +198,8 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
                 <BarChart data={clientsByCity} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="clientBarGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#4B4B4B" stopOpacity={1}/>
-                      <stop offset="100%" stopColor="#4B4B4B" stopOpacity={0.6}/>
+                      <stop offset="0%" stopColor="#E41E26" stopOpacity={1}/>
+                      <stop offset="100%" stopColor="#E41E26" stopOpacity={0.6}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
