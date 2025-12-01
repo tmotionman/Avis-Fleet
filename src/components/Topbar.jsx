@@ -329,18 +329,22 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
       // Update local state
       setSavedProfilePhoto(profileData.profilePhoto)
       
-      // Update localStorage and parent state
+      // Update localStorage with minimal data (NOT storing Base64 photo to avoid quota exceeded)
       const newUserData = {
-        ...currentUser,
+        id: currentUser?.id,
         name: updatedUser.name,
         email: updatedUser.email,
-        avatarUrl: updatedUser.avatarUrl,
+        role: currentUser?.role,
+        // Don't store avatarUrl in localStorage - it will be fetched from DB on next login
       }
       localStorage.setItem('avis_currentUser', JSON.stringify(newUserData))
       
-      // Notify parent to update currentUser state
+      // Notify parent to update currentUser state with the avatar URL
       if (onProfileUpdate) {
-        onProfileUpdate(newUserData)
+        onProfileUpdate({
+          ...newUserData,
+          avatarUrl: updatedUser.avatarUrl,
+        })
       }
       
       setShowProfileModal(false)
