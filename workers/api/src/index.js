@@ -958,44 +958,11 @@ async function getExchangeRates(allowedOrigin, allowedOrigins) {
 // Parse Bank of Zambia HTML for exchange rates
 function parseBoZRates(html) {
   try {
-    // Look for exchange rate patterns in the HTML
-    // This is a simple parser - BoZ site structure may vary
-    const rates = [];
-    
-    // Try to find USD rate
-    const usdMatch = html.match(/USD[\s\S]*?(\d+\.?\d*)/i);
-    if (usdMatch) {
-      const rate = parseFloat(usdMatch[1]);
-      rates.push({ 
-        currency: 'USD', 
-        buy: parseFloat((rate * 0.999).toFixed(4)), 
-        sell: parseFloat((rate * 1.001).toFixed(4)) 
-      });
-    }
-    
-    // Try to find GBP rate
-    const gbpMatch = html.match(/GBP[\s\S]*?(\d+\.?\d*)/i);
-    if (gbpMatch) {
-      const rate = parseFloat(gbpMatch[1]);
-      rates.push({ 
-        currency: 'GBP', 
-        buy: parseFloat((rate * 0.999).toFixed(4)), 
-        sell: parseFloat((rate * 1.001).toFixed(4)) 
-      });
-    }
-    
-    // Try to find EUR rate
-    const eurMatch = html.match(/EUR[\s\S]*?(\d+\.?\d*)/i);
-    if (eurMatch) {
-      const rate = parseFloat(eurMatch[1]);
-      rates.push({ 
-        currency: 'EUR', 
-        buy: parseFloat((rate * 0.999).toFixed(4)), 
-        sell: parseFloat((rate * 1.001).toFixed(4)) 
-      });
-    }
-    
-    return rates.length > 0 ? rates : null;
+    // The Bank of Zambia website structure changes frequently
+    // A reliable parsing method would require API access or constant HTML structure monitoring
+    // For now, return null to use cached fallback rates which are more reliable
+    // TODO: Consider using an alternative exchange rate API (e.g., exchangerate-api.com, fixer.io)
+    return null;
   } catch (e) {
     console.error('Parse BoZ rates error:', e);
     return null;
