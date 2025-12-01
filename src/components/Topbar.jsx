@@ -304,11 +304,71 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
     language: 'English',
   })
 
-  const notifications = [
-    { id: 1, message: 'New vehicle added to fleet: VEH009', priority: 'high' },
-    { id: 2, message: 'Fleet assignment updated for client ABC Corp', priority: 'medium' },
-    { id: 3, message: 'New user registration pending approval', priority: 'low' },
-  ]
+  // Generate real notifications from app data
+  const generateNotifications = () => {
+    const notifs = []
+
+    // Check for vehicles needing maintenance (mileage > 80000 km)
+    const vehiclesNeedingMaintenance = vehicles.filter(v => v.mileage && v.mileage > 80000)
+    if (vehiclesNeedingMaintenance.length > 0) {
+      notifs.push({
+        id: `maint-${vehiclesNeedingMaintenance[0].id}`,
+        message: `${vehiclesNeedingMaintenance.length} vehicle(s) due for maintenance (mileage > 80,000 km)`,
+        priority: 'high',
+        type: 'maintenance',
+        data: vehiclesNeedingMaintenance
+      })
+    }
+
+    // Check for vehicles with "In Service" status
+    const vehiclesInService = vehicles.filter(v => v.status === 'In Service')
+    if (vehiclesInService.length > 0) {
+      notifs.push({
+        id: `in-service-${Date.now()}`,
+        message: `${vehiclesInService.length} vehicle(s) currently in service`,
+        priority: 'medium',
+        type: 'status',
+        data: vehiclesInService
+      })
+    }
+
+    // Check for unassigned vehicles
+    const unassignedVehicles = vehicles.filter(v => !v.assignedTo)
+    if (unassignedVehicles.length > 0) {
+      notifs.push({
+        id: `unassigned-${Date.now()}`,
+        message: `${unassignedVehicles.length} vehicle(s) available for assignment`,
+        priority: 'medium',
+        type: 'available',
+        data: unassignedVehicles
+      })
+    }
+
+    // Check for clients with pending assignments
+    if (clients.length > 10) {
+      notifs.push({
+        id: `clients-${Date.now()}`,
+        message: `You have ${clients.length} clients in the system`,
+        priority: 'low',
+        type: 'info',
+        count: clients.length
+      })
+    }
+
+    // Add general summary if no other notifications
+    if (notifs.length === 0) {
+      notifs.push({
+        id: 'summary',
+        message: `Fleet Summary: ${vehicles.length} vehicles, ${clients.length} clients`,
+        priority: 'low',
+        type: 'info'
+      })
+    }
+
+    return notifs
+  }
+
+  const notifications = generateNotifications()
 
   const handleProfileSave = async () => {
     setIsSaving(true)
@@ -605,18 +665,40 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
                 <h3 className="font-semibold text-avis-black">Notifications</h3>
               </div>
               <div className="max-h-96 overflow-y-auto">
-                {notifications.map((notif) => (
-                  <div key={notif.id} className="p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors">
+                {notifications.length > 0 ? notifications.map((notif) => (
+                  <div key={notif.id} className="p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors last:border-0">
                     <div className="flex items-start gap-3">
-                      <div className={`w-2 h-2 rounded-full mt-1 ${
+                      <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
                         notif.priority === 'high' ? 'bg-avis-red' :
                         notif.priority === 'medium' ? 'bg-yellow-500' :
                         'bg-blue-500'
                       }`}></div>
-                      <p className="text-sm text-gray-700">{notif.message}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-700 font-medium">{notif.message}</p>
+                        
+                        {/* Show vehicle details if applicable */}
+                        {notif.data && Array.isArray(notif.data) && notif.data.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            {notif.data.slice(0, 3).map((item, idx) => (
+                              <div key={idx} className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
+                                {item.registrationNo || item.name} {item.model && `- ${item.model}`}
+                              </div>
+                            ))}
+                            {notif.data.length > 3 && (
+                              <div className="text-xs text-gray-400 px-2">
+                                +{notif.data.length - 3} more
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="p-6 text-center">
+                    <p className="text-sm text-gray-400">No notifications</p>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
