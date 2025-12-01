@@ -326,6 +326,7 @@ function App() {
         return (
           <Dashboard 
             vehicles={vehicles} 
+            clients={clients}
             assignments={assignments} 
             onNavigate={setCurrentPage} 
           />

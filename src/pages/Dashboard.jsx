@@ -5,7 +5,7 @@ import { FaCarSide, FaCheckCircle, FaCar, FaExclamationTriangle, FaClock, FaPlus
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import sunsetDriveWebp from '../assets/sunset-coast-drive.webp'
 
-const Dashboard = ({ vehicles, assignments = [], onNavigate }) => {
+const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => {
   const [currentTime, setCurrentTime] = useState(new Date())
 
   useEffect(() => {
@@ -48,6 +48,16 @@ const Dashboard = ({ vehicles, assignments = [], onNavigate }) => {
     }, {})
     return Object.entries(counts).map(([name, count]) => ({ name, count }))
   }, [vehiclesData])
+
+  // Clients by City Chart Data
+  const clientsByCity = useMemo(() => {
+    const counts = (clients || []).reduce((acc, c) => {
+      const city = c.city || 'Unknown'
+      acc[city] = (acc[city] || 0) + 1
+      return acc
+    }, {})
+    return Object.entries(counts).map(([name, count]) => ({ name, count }))
+  }, [clients])
 
   // Status Chart Data
   const statusData = [
@@ -221,6 +231,54 @@ const Dashboard = ({ vehicles, assignments = [], onNavigate }) => {
                     fill="url(#barGradient)" 
                     radius={[6, 6, 0, 0]} 
                     name="Vehicles" 
+                    barSize={40}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+
+          {/* Clients by City Chart */}
+          <motion.div variants={itemVariants} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="text-lg font-semibold text-avis-black mb-4">Clients by City</h3>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={clientsByCity} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="clientBarGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#4B4B4B" stopOpacity={1}/>
+                      <stop offset="100%" stopColor="#4B4B4B" stopOpacity={0.6}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#6B7280', fontSize: 12, fontWeight: 500 }} 
+                    dy={10}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#6B7280', fontSize: 12 }} 
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#1F2937', 
+                      border: 'none', 
+                      borderRadius: '8px', 
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                      color: '#F3F4F6'
+                    }}
+                    itemStyle={{ color: '#F3F4F6' }}
+                    cursor={{ fill: '#F9FAFB', opacity: 0.5 }}
+                  />
+                  <Bar 
+                    dataKey="count" 
+                    fill="url(#clientBarGradient)" 
+                    radius={[6, 6, 0, 0]} 
+                    name="Clients" 
                     barSize={40}
                   />
                 </BarChart>
