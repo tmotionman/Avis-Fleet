@@ -276,6 +276,7 @@ const SettingsModal = ({ showSettingsModal, setShowSettingsModal, settings, setS
 const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileUpdate, vehicles = [], clients = [], users = [] }) => {
   const [profileOpen, setProfileOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [notificationsViewed, setNotificationsViewed] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [dragActive, setDragActive] = useState(false)
@@ -646,11 +647,14 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
         {/* Notifications */}
         <div className="relative">
           <button
-            onClick={() => setNotificationsOpen(!notificationsOpen)}
+            onClick={() => {
+              setNotificationsOpen(!notificationsOpen)
+              setNotificationsViewed(true)
+            }}
             className="relative p-2 text-gray-600 hover:text-avis-red hover:bg-gray-100 rounded-lg transition-all"
           >
             <Bell size={20} />
-            {notifications.length > 0 && (
+            {notifications.length > 0 && !notificationsViewed && (
               <span className="absolute top-0 right-0 w-5 h-5 bg-avis-red text-white text-xs font-bold rounded-full flex items-center justify-center">
                 {notifications.length > 9 ? '9+' : notifications.length}
               </span>
