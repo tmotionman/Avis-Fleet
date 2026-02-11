@@ -25,7 +25,22 @@ function App() {
       return false
     }
   })
-  const [currentPage, setCurrentPage] = useState('dashboard')
+  const [currentPage, setCurrentPage] = useState(() => {
+    try {
+      return localStorage.getItem('avis_currentPage') || 'dashboard'
+    } catch (e) {
+      return 'dashboard'
+    }
+  })
+
+  // Persist current page to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('avis_currentPage', currentPage)
+    } catch (e) {
+      // ignore
+    }
+  }, [currentPage])
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [currentUser, setCurrentUser] = useState(() => {
     try {
@@ -281,6 +296,7 @@ function App() {
     try {
       localStorage.removeItem('avis_isAuthenticated')
       localStorage.removeItem('avis_currentUser')
+      localStorage.removeItem('avis_currentPage')
     } catch (e) {
       // ignore
     }
