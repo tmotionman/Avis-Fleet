@@ -193,6 +193,7 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
   }
 
   return (
+    <div className="relative">
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -206,7 +207,7 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
         </div>
         <button
           onClick={handleAddClick}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-avis-red to-red-700 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+          className="flex items-center gap-2 px-3 py-1 bg-avis-red text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md transition-all duration-300"
         >
           <Plus size={16} />
           Add Vehicle
@@ -215,31 +216,31 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+        <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
           <div>
-            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Total Vehicles</p>
-            <p className="text-3xl font-bold text-white mt-1">{vehicles.length}</p>
+            <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Vehicles</p>
+            <p className="text-3xl font-bold text-avis-black mt-1">{vehicles.length}</p>
           </div>
           <div className="w-3 h-3 rounded-full bg-avis-red"></div>
         </div>
-        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+        <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
           <div>
-            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Available</p>
-            <p className="text-3xl font-bold text-white mt-1">{vehicles.filter(v => v.status === 'Available').length}</p>
+            <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Available</p>
+            <p className="text-3xl font-bold text-avis-black mt-1">{vehicles.filter(v => v.status === 'Available').length}</p>
           </div>
           <div className="w-3 h-3 rounded-full bg-avis-red"></div>
         </div>
-        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+        <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
           <div>
-            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">On Rent</p>
-            <p className="text-3xl font-bold text-white mt-1">{vehicles.filter(v => v.status === 'On Rent').length}</p>
+            <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">On Rent</p>
+            <p className="text-3xl font-bold text-avis-black mt-1">{vehicles.filter(v => v.status === 'On Rent').length}</p>
           </div>
           <div className="w-3 h-3 rounded-full bg-avis-red"></div>
         </div>
-        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+        <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
           <div>
-            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Maintenance</p>
-            <p className="text-3xl font-bold text-white mt-1">{vehicles.filter(v => v.status === 'Maintenance').length}</p>
+            <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Maintenance</p>
+            <p className="text-3xl font-bold text-avis-black mt-1">{vehicles.filter(v => v.status === 'Maintenance').length}</p>
           </div>
           <div className="w-3 h-3 rounded-full bg-avis-red"></div>
         </div>
@@ -254,12 +255,11 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
               setAvailabilityTab(tab)
               setCurrentPage(1) // Reset to first page when switching tabs
             }}
-            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`px-6 py-3 font-medium text-sm transition-all duration-200 border-b-2 ${
               availabilityTab === tab
                 ? 'text-avis-red border-avis-red'
-                : 'text-gray-600 border-transparent hover:text-gray-900'
+                : 'text-gray-600 border-transparent'
             }`}
           >
             {tab === 'All' && `All Fleets (${vehicles.length})`}
@@ -287,10 +287,9 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
           
           <div className="relative z-20">
             <motion.button
-              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-              className="flex items-center gap-3 px-4 py-2.5 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-avis-red/30 transition-all duration-200 min-w-[200px] justify-between group"
+              className="flex items-center gap-3 px-4 py-2.5 bg-white border border-gray-200 rounded-xl shadow-sm transition-all duration-200 min-w-[200px] justify-between group"
             >
               <div className="flex items-center gap-2">
                 <div className={`p-1.5 rounded-md ${statusOptions.find(o => o.value === statusFilter)?.bg || 'bg-gray-100'}`}>
@@ -337,7 +336,7 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
                           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                             statusFilter === option.value
                               ? 'bg-red-50 text-avis-red'
-                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:pl-4'
+                              : 'text-gray-600'
                           }`}
                         >
                           <div className={`p-1.5 rounded-md ${statusFilter === option.value ? 'bg-red-100' : 'bg-gray-100'}`}>
@@ -386,7 +385,7 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th 
-                  className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer hover:bg-gray-100"
+                  className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer"
                   onClick={() => handleSort('registrationNo')}
                 >
                   <div className="flex items-center gap-1">
@@ -394,7 +393,7 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
                   </div>
                 </th>
                 <th 
-                  className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer hover:bg-gray-100"
+                  className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer"
                   onClick={() => handleSort('model')}
                 >
                   <div className="flex items-center gap-1">
@@ -402,7 +401,7 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
                   </div>
                 </th>
                 <th 
-                  className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer hover:bg-gray-100"
+                  className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer"
                   onClick={() => handleSort('year')}
                 >
                   <div className="flex items-center gap-1">
@@ -410,7 +409,7 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
                   </div>
                 </th>
                 <th 
-                  className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer hover:bg-gray-100"
+                  className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer"
                   onClick={() => handleSort('location')}
                 >
                   <div className="flex items-center gap-1">
@@ -418,7 +417,7 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
                   </div>
                 </th>
                 <th 
-                  className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer hover:bg-gray-100"
+                  className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer"
                   onClick={() => handleSort('status')}
                 >
                   <div className="flex items-center gap-1">
@@ -442,7 +441,7 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: index * 0.03 }}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  className="border-b border-gray-100 transition-colors"
                 >
                   <td className="px-4 py-3">
                     <span className="text-sm font-medium text-avis-black">{vehicle.registrationNo}</span>
@@ -462,28 +461,25 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
                       <motion.button
-                        whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => handleViewClick(vehicle)}
-                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="p-2 text-gray-600 rounded-lg transition-colors"
                         title="View Details"
                       >
                         <Eye size={16} />
                       </motion.button>
                       <motion.button
-                        whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => handleEditClick(vehicle)}
-                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="p-2 text-gray-600 rounded-lg transition-colors"
                         title="Edit"
                       >
                         <Edit size={16} />
                       </motion.button>
                       <motion.button
-                        whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => handleDeleteClick(vehicle)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-red-600 rounded-lg transition-colors"
                         title="Delete"
                       >
                         <Trash2 size={16} />
@@ -502,24 +498,24 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
           <p className="text-sm text-gray-600">Page {currentPage} of {totalPages}</p>
           <div className="flex gap-2">
             <motion.button
-              whileHover={{ scale: 1.05 }}
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-50 transition-colors"
+              className="p-2 text-gray-600 rounded-lg disabled:opacity-50 transition-colors"
             >
               <ChevronLeft size={18} />
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.05 }}
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-50 transition-colors"
+              className="p-2 text-gray-600 rounded-lg disabled:opacity-50 transition-colors"
             >
               <ChevronRight size={18} />
             </motion.button>
           </div>
         </div>
       </motion.div>
+
+    </motion.div>
 
       {/* Vehicle Detail Modal */}
       <AnimatePresence>
@@ -528,7 +524,7 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4"
             onClick={() => setShowDetailModal(false)}
           >
             <motion.div
@@ -540,7 +536,7 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-avis-black">Vehicle Details</h2>
-                <button onClick={() => setShowDetailModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <button onClick={() => setShowDetailModal(false)} className="p-2 rounded-lg">
                   <X size={20} />
                 </button>
               </div>
@@ -572,10 +568,6 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
                   </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-500 uppercase font-semibold">Assigned To</p>
-                  <p className="text-sm font-medium text-avis-black mt-1">{selectedVehicle.assignedTo || 'Unassigned'}</p>
-                </div>
-                <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-500 uppercase font-semibold">Last Service</p>
                   <p className="text-sm font-medium text-avis-black mt-1 flex items-center gap-1">
                     <Calendar size={12} /> {selectedVehicle.lastServiceDate || '—'}
@@ -586,13 +578,12 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
               {/* Action Buttons */}
               <div className="flex gap-3 mt-6">
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => {
                     setShowDetailModal(false)
                     handleEditClick(selectedVehicle)
                   }}
-                  className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-avis-red rounded-lg shadow-md transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   <Edit size={16} /> Edit Vehicle
                 </motion.button>
@@ -609,7 +600,7 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4"
             onClick={() => setShowDeleteConfirm(false)}
           >
             <motion.div
@@ -626,22 +617,20 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
               <p className="text-gray-600 text-center mb-6">
                 Are you sure you want to delete <strong>{vehicleToDelete.registrationNo}</strong>? This action cannot be undone.
               </p>
-              <div className="flex gap-3">
+              <div className="flex gap-4 mt-8">
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 px-4 py-2.5 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200"
+                  className="flex-1 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-gray-600 border-2 border-gray-200 rounded-full transition-all duration-200"
                 >
-                  Cancel
+                  No, Keep it
                 </motion.button>
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={confirmDelete}
-                  className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                  className="flex-1 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-red-600 rounded-full shadow-md transition-all duration-200"
                 >
-                  Delete
+                  Yes, Delete
                 </motion.button>
               </div>
             </motion.div>
@@ -656,7 +645,7 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4"
           onClick={() => setShowModal(false)}
         >
           <motion.div
@@ -670,7 +659,7 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
               <h2 className="text-2xl font-bold text-avis-black">
                 {editingVehicle ? 'Edit Vehicle' : 'Add New Vehicle'}
               </h2>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+              <button onClick={() => setShowModal(false)} className="p-2 rounded-lg">
                 <X size={20} />
               </button>
             </div>
@@ -732,32 +721,20 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
                   options={['Available', 'On Rent', 'Maintenance']}
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Assigned To</label>
-                <input
-                  type="text"
-                  value={formData.assignedTo}
-                  onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
-                  className="input-field"
-                  placeholder="e.g., John Smith or Unassigned"
-                />
-              </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-3 mt-8">
               <motion.button
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setShowModal(false)}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200"
+                className="flex-1 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-avis-red border-2 border-avis-red rounded-full transition-all duration-200"
               >
                 Cancel
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSave}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                className="flex-1 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-avis-red rounded-full shadow-md transition-all duration-200"
               >
                 {editingVehicle ? 'Update Vehicle' : 'Add Vehicle'}
               </motion.button>
@@ -766,7 +743,7 @@ const FleetList = ({ vehicles, setVehicles, onCreateVehicle, onUpdateVehicle, on
         </motion.div>
       )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   )
 }
 

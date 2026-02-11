@@ -77,6 +77,7 @@ const MaintenanceTracker = () => {
   const totalCost = maintenance.reduce((sum, m) => sum + m.cost, 0)
 
   return (
+    <div className="relative">
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -89,12 +90,11 @@ const MaintenanceTracker = () => {
           <p className="text-gray-500 mt-1">Track and manage vehicle maintenance schedules</p>
         </div>
         <motion.button
-          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleAddClick}
-          className="btn-primary flex items-center gap-2"
+          className="flex items-center gap-2 px-3 py-1 bg-avis-red text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md transition-all duration-200"
         >
-          <Plus size={20} />
+          <Plus size={16} />
           Add Record
         </motion.button>
       </div>
@@ -143,7 +143,7 @@ const MaintenanceTracker = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: index * 0.05 }}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  className="border-b border-gray-100 transition-colors"
                 >
                   <td className="px-6 py-4 text-sm font-medium text-avis-black">{record.vehicleNo}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">{record.serviceType}</td>
@@ -156,18 +156,16 @@ const MaintenanceTracker = () => {
                   </td>
                   <td className="px-6 py-4 flex gap-2">
                     <motion.button
-                      whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => handleEditClick(record)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-blue-600 rounded-lg transition-colors"
                     >
                       <Edit size={18} />
                     </motion.button>
                     <motion.button
-                      whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => handleDelete(record.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 text-red-600 rounded-lg transition-colors"
                     >
                       <Trash2 size={18} />
                     </motion.button>
@@ -183,18 +181,16 @@ const MaintenanceTracker = () => {
           <p className="text-sm text-gray-600">Page {currentPage} of {totalPages}</p>
           <div className="flex gap-2">
             <motion.button
-              whileHover={{ scale: 1.05 }}
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-50 transition-colors"
+              className="p-2 text-gray-600 rounded-lg disabled:opacity-50 transition-colors"
             >
               <ChevronLeft size={18} />
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.05 }}
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-50 transition-colors"
+              className="p-2 text-gray-600 rounded-lg disabled:opacity-50 transition-colors"
             >
               <ChevronRight size={18} />
             </motion.button>
@@ -202,13 +198,15 @@ const MaintenanceTracker = () => {
         </div>
       </motion.div>
 
+    </motion.div>
+
       {/* Modal */}
       {showModal && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]"
           onClick={() => setShowModal(false)}
         >
           <motion.div
@@ -273,18 +271,16 @@ const MaintenanceTracker = () => {
             </div>
             <div className="flex gap-3 mt-8">
               <motion.button
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setShowModal(false)}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200"
+                className="flex-1 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-avis-red border-2 border-avis-red rounded-full transition-all duration-200"
               >
                 Cancel
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSave}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                className="flex-1 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-avis-red rounded-full shadow-md transition-all duration-200"
               >
                 {editingRecord ? 'Update' : 'Add'}
               </motion.button>
@@ -292,7 +288,7 @@ const MaintenanceTracker = () => {
           </motion.div>
         </motion.div>
       )}
-    </motion.div>
+    </div>
   )
 }
 

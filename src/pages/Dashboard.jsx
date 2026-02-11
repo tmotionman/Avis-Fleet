@@ -3,14 +3,16 @@ import { motion } from 'framer-motion'
 import KPICard from '../components/KPICard'
 import { FaCarSide, FaCheckCircle, FaCar, FaExclamationTriangle, FaClock, FaPlus, FaUserPlus, FaClipboardList, FaImage, FaSync } from 'react-icons/fa'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { exchangeRatesApi } from '../lib/d1Client'
+import { exchangeRatesApi, dashboardApi } from '../lib/d1Client'
 import sunsetDriveWebp from '../assets/sunset-coast-drive.webp'
 
-const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => {
+const Dashboard = ({ vehicles, clients = [], assignments = [], currentUser, onNavigate }) => {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [exchangeRates, setExchangeRates] = useState([])
+  const [dashboardStats, setDashboardStats] = useState(null)
   const [lastUpdated, setLastUpdated] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isStatsLoading, setIsStatsLoading] = useState(false)
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -19,10 +21,11 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
     return () => clearInterval(timer)
   }, [])
 
-  // Fetch exchange rates on mount
+  // Fetch data on mount or when user changes
   useEffect(() => {
     fetchExchangeRates()
-  }, [])
+    fetchDashboardStats()
+  }, [currentUser?.id, currentUser?.email])
 
   const fetchExchangeRates = async () => {
     setIsLoading(true)
@@ -45,12 +48,25 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
     }
   }
 
-  // Calculate KPI values from props
+  const fetchDashboardStats = async () => {
+    setIsStatsLoading(true)
+    try {
+      const userId = currentUser?.id || currentUser?.email
+      const data = await dashboardApi.getStats(userId)
+      setDashboardStats(data)
+    } catch (error) {
+      console.error('Failed to fetch dashboard stats:', error)
+    } finally {
+      setIsStatsLoading(false)
+    }
+  }
+
+  // Calculate KPI values from props (as fallback or primary)
   const vehiclesData = vehicles || []
-  const totalVehicles = vehiclesData.length
-  const availableVehicles = vehiclesData.filter(v => v.status === 'Available').length
-  const vehiclesOnRent = vehiclesData.filter(v => v.status === 'On Rent').length
-  const maintenanceVehicles = vehiclesData.filter(v => v.status === 'Maintenance').length
+  const totalVehicles = dashboardStats?.vehicles?.total ?? vehiclesData.length
+  const availableVehicles = dashboardStats?.vehicles?.available ?? vehiclesData.filter(v => v.status === 'Available').length
+  const vehiclesOnRent = dashboardStats?.vehicles?.on_rent ?? vehiclesData.filter(v => v.status === 'On Rent').length
+  const maintenanceVehicles = dashboardStats?.vehicles?.maintenance ?? vehiclesData.filter(v => v.status === 'Maintenance').length
 
   // Calculate Alerts
   const today = new Date().toISOString().split('T')[0]
@@ -100,10 +116,6 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
     },
   }
 
@@ -112,7 +124,7 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5 },
+      transition: { duration: 0.3 },
     },
   }
 
@@ -133,23 +145,20 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
         <motion.div variants={itemVariants} className="flex gap-3">
           <button 
             onClick={() => onNavigate('assignment')}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-avis-red to-red-700 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+            className="px-3 py-1 bg-avis-red text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md transition-all duration-200"
           >
-            <FaPlus className="text-xs" />
             New Assignment
           </button>
           <button 
             onClick={() => onNavigate('fleet')}
-            className="flex items-center gap-2 px-4 py-2 bg-avis-darkgray text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md hover:shadow-lg hover:bg-gray-800 hover:scale-105 transition-all duration-300"
+            className="px-3 py-1 bg-avis-darkgray text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md transition-all duration-200"
           >
-            <FaCar className="text-xs" />
             Add Vehicle
           </button>
           <button 
             onClick={() => onNavigate('clients')}
-            className="flex items-center gap-2 px-4 py-2 bg-avis-darkgray text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md hover:shadow-lg hover:bg-gray-800 hover:scale-105 transition-all duration-300"
+            className="px-3 py-1 bg-avis-darkgray text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md transition-all duration-200"
           >
-            <FaUserPlus className="text-xs" />
             Add Client
           </button>
         </motion.div>
@@ -159,53 +168,50 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
         {/* KPI Cards Column */}
         <motion.div variants={itemVariants} className="flex flex-col gap-4">
           {/* Image Placeholder Card */}
-          <div className="bg-avis-darkgray rounded-xl shadow-sm border border-avis-darkgray h-48 flex items-center justify-center overflow-hidden relative group cursor-pointer hover:shadow-md transition-all duration-200">
+          <div className="bg-avis-darkgray rounded-xl border border-avis-darkgray h-48 flex items-center justify-center overflow-hidden relative group transition-all duration-200">
             <img 
               src={sunsetDriveWebp}
               alt="Featured Vehicle" 
               loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+              className="absolute inset-0 w-full h-full object-cover opacity-90 transition-opacity"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
           </div>
 
-          <div onClick={() => onNavigate('fleet')} className="cursor-pointer transform transition-transform hover:scale-105">
+          <div onClick={() => onNavigate('fleet')}>
             <KPICard
               icon={<FaCarSide />}
               label="Total Vehicles"
               value={totalVehicles}
-              trend={5}
               color="#E41E26"
               size="small"
             />
           </div>
-          <div onClick={() => onNavigate('fleet')} className="cursor-pointer transform transition-transform hover:scale-105">
+          <div onClick={() => onNavigate('fleet')}>
             <KPICard
               icon={<FaCheckCircle />}
               label="Available Vehicles"
               value={availableVehicles}
-              trend={8}
               color="#22C55E"
               size="small"
             />
           </div>
-          <div onClick={() => onNavigate('fleet')} className="cursor-pointer transform transition-transform hover:scale-105">
+          <div onClick={() => onNavigate('fleet')}>
             <KPICard
               icon={<FaCar />}
               label="On Rent"
               value={vehiclesOnRent}
-              trend={2}
               color="#3B82F6"
               size="small"
             />
           </div>
 
           {/* Time & Date Card */}
-          <div className="bg-avis-darkgray rounded-xl shadow-sm border border-avis-darkgray p-4 flex flex-col items-center justify-center text-white h-24 transform transition-transform hover:scale-105">
-             <div className="text-3xl font-bold tracking-widest">
+          <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex flex-col items-center justify-center h-24">
+             <div className="text-3xl font-bold tracking-widest text-avis-black">
                {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
              </div>
-             <div className="text-xs font-bold uppercase tracking-wider mt-1 text-gray-300">
+             <div className="text-xs font-bold uppercase tracking-wider mt-1 text-gray-600">
                {currentTime.toLocaleDateString([], { day: '2-digit', month: '2-digit', year: 'numeric' })}
              </div>
           </div>
@@ -213,7 +219,7 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
         {/* Left Column - Alerts & Location Chart */}
         <div className="lg:col-span-2 space-y-6">
           {/* Clients by City Chart */}
-          <motion.div variants={itemVariants} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <motion.div variants={itemVariants} className="bg-white p-6 rounded-xl border border-gray-200">
             <h3 className="text-lg font-semibold text-avis-black mb-4">Clients by City</h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -262,10 +268,10 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
           </motion.div>
 
           {/* Recent Activity Feed */}
-          <motion.div variants={itemVariants} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <motion.div variants={itemVariants} className="bg-white p-6 rounded-xl border border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-avis-black">Recent Activity</h3>
-              <button onClick={() => onNavigate('assignment')} className="text-xs text-avis-red font-medium hover:underline">View All</button>
+              <button onClick={() => onNavigate('assignment')} className="text-xs text-avis-red font-medium">View All</button>
             </div>
             <div className="space-y-4 max-h-[180px] overflow-y-auto pr-2 custom-scrollbar">
               {recentActivity.length === 0 ? (
@@ -292,7 +298,7 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
         {/* Right Column - Status Donut & Recent Activity */}
         <div className="space-y-6">
           {/* Status Donut Chart */}
-          <motion.div variants={itemVariants} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <motion.div variants={itemVariants} className="bg-white p-6 rounded-xl border border-gray-200">
             <h3 className="text-lg font-semibold text-avis-black mb-4">Fleet Status</h3>
             <div className="h-[250px] w-full relative">
               <ResponsiveContainer width="100%" height="100%">
@@ -341,7 +347,7 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
           </motion.div>
 
           {/* Exchange Rates Card */}
-          <motion.div variants={itemVariants} className="bg-avis-darkgray p-6 rounded-xl shadow-sm border border-avis-darkgray">
+          <motion.div variants={itemVariants} className="bg-avis-darkgray p-6 rounded-xl border border-avis-darkgray">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div>
@@ -354,7 +360,7 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
                 disabled={isLoading}
                 animate={isLoading ? { rotate: 360 } : { rotate: 0 }}
                 transition={{ duration: 1, repeat: isLoading ? Infinity : 0 }}
-                className="p-2 hover:bg-white/10 rounded-full transition-colors group disabled:opacity-50"
+                className="p-2 rounded-full transition-colors group disabled:opacity-50"
               >
                 <FaSync className="text-gray-400 text-xs group-hover:text-white transition-colors" />
               </motion.button>
@@ -371,7 +377,7 @@ const Dashboard = ({ vehicles, clients = [], assignments = [], onNavigate }) => 
                 <p className="text-center text-gray-400 text-xs py-4">Loading rates...</p>
               ) : (
                 exchangeRates.map((rate, index) => (
-                  <div key={index} className="grid grid-cols-3 items-center p-2 rounded-lg hover:bg-white/5 transition-colors border border-transparent">
+                  <div key={index} className="grid grid-cols-3 items-center p-2 rounded-lg transition-colors border border-transparent">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-white text-sm">{rate.currency}</span>
                     </div>

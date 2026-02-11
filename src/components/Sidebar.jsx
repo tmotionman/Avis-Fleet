@@ -19,7 +19,7 @@ const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) =
       {/* Mobile Menu Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="fixed top-4 left-4 z-50 lg:hidden bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors"
+        className="fixed top-4 left-4 z-50 lg:hidden bg-red-600 text-white p-2 rounded-lg transition-colors"
       >
         {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
@@ -36,7 +36,7 @@ const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) =
       )}
 
       {/* Desktop Sidebar - permanently expanded */}
-  <div className="hidden lg:flex fixed inset-y-0 left-0 top-0 bottom-0 h-screen w-64 bg-[#262626] border-r-[0.25px] border-avis-red shadow-[4px_0_24px_rgba(228,30,38,0.15)] flex-col items-start py-6 z-40 overflow-y-auto">
+  <div className="hidden lg:flex fixed inset-y-0 left-0 top-0 bottom-0 h-screen w-64 bg-[#262626] border-r border-gray-800 flex-col items-start py-6 z-40 overflow-y-auto">
 
         {/* Navigation Items */}
         <nav className="flex-1 flex flex-col gap-3 w-full px-4 pt-12">
@@ -46,12 +46,11 @@ const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) =
               <motion.button
                 key={item.id}
                 onClick={() => setCurrentPage(item.id)}
-                whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
                 className={`flex items-center gap-3 px-3 py-2 w-full rounded-lg transition-all duration-200 ${
                     currentPage === item.id
                       ? 'bg-[#1f1f1f] text-white shadow-inner relative'
-                      : 'text-gray-300 hover:text-white hover:bg-[#2b2b2b]'
+                      : 'text-gray-300'
                   }`}
               >
                 <IconComponent size={20} />
@@ -72,7 +71,7 @@ const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) =
 
         {/* Desktop bottom copyright (pinned to bottom) */}
         <div className="absolute left-0 right-0 bottom-3 px-4 border-t border-gray-600 pt-3">
-          <p className="text-xs text-gray-400 text-center">© 2025 Ancestro</p>
+          <p className="text-xs text-gray-400 text-center">© 2026 Ancestro</p>
         </div>
       </div>
 
@@ -81,7 +80,7 @@ const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) =
         initial={{ x: -300 }}
         animate={{ x: sidebarOpen ? 0 : -300 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed lg:hidden left-0 top-0 h-screen w-72 bg-[#262626] border-r-[0.25px] border-avis-red shadow-[4px_0_24px_rgba(228,30,38,0.15)] z-40 flex flex-col overflow-y-auto"
+        className="fixed lg:hidden left-0 top-0 h-screen w-72 bg-[#262626] border-r border-gray-800 z-40 flex flex-col overflow-y-auto"
       >
         {/* Mobile Header */}
         <div className="h-20 flex items-center justify-center border-b border-gray-800">
@@ -102,11 +101,10 @@ const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) =
                   setCurrentPage(item.id)
                   setSidebarOpen(false)
                 }}
-                whileHover={{ x: 4 }}
                 className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-300 ${
                     currentPage === item.id
                       ? 'bg-[#1f1f1f] text-white shadow-inner'
-                      : 'text-gray-400 hover:text-white hover:bg-[#2b2b2b]'
+                      : 'text-gray-400'
                   }`}
               >
                 <IconComponent size={20} />
@@ -119,7 +117,7 @@ const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen }) =
         {/* Mobile User Profile removed for mobile view per request */}
         {/* Mobile copyright */}
         <div className="px-4 py-3 text-center border-t border-gray-600">
-          <p className="text-xs text-gray-400">© 2025 Ancestro</p>
+          <p className="text-xs text-gray-400">© 2026 Ancestro</p>
         </div>
       </motion.div>
     </>

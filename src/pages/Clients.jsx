@@ -115,6 +115,7 @@ const Clients = ({ clients: initialClients = [], refreshData, currentUser }) => 
   }
 
   return (
+    <div className="relative">
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -128,7 +129,7 @@ const Clients = ({ clients: initialClients = [], refreshData, currentUser }) => 
         </div>
         <button
           onClick={handleAddClick}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-avis-red to-red-700 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+          className="flex items-center gap-2 px-3 py-1 bg-avis-red text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md transition-all duration-300"
         >
           <Plus size={16} />
           Add Client
@@ -137,24 +138,24 @@ const Clients = ({ clients: initialClients = [], refreshData, currentUser }) => 
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+        <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
           <div>
-            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Total Clients</p>
-            <p className="text-3xl font-bold text-white mt-1">{clients.length}</p>
+            <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Clients</p>
+            <p className="text-3xl font-bold text-avis-black mt-1">{clients.length}</p>
           </div>
           <div className="w-3 h-3 rounded-full bg-avis-red"></div>
         </div>
-        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+        <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
           <div>
-            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Active Clients</p>
-            <p className="text-3xl font-bold text-white mt-1">{clients.filter(c => c.status === 'Active').length}</p>
+            <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Active Clients</p>
+            <p className="text-3xl font-bold text-avis-black mt-1">{clients.filter(c => c.status === 'Active').length}</p>
           </div>
           <div className="w-3 h-3 rounded-full bg-avis-red"></div>
         </div>
-        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+        <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
           <div>
-            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Industries</p>
-            <p className="text-3xl font-bold text-white mt-1">{new Set(clients.map(c => c.industry)).size}</p>
+            <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Industries</p>
+            <p className="text-3xl font-bold text-avis-black mt-1">{new Set(clients.map(c => c.industry)).size}</p>
           </div>
           <div className="w-3 h-3 rounded-full bg-avis-red"></div>
         </div>
@@ -206,7 +207,7 @@ const Clients = ({ clients: initialClients = [], refreshData, currentUser }) => 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: index * 0.05 }}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                    className="border-b border-gray-100 transition-colors"
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -241,19 +242,17 @@ const Clients = ({ clients: initialClients = [], refreshData, currentUser }) => 
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
                         <motion.button
-                          whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={(e) => handleEditClick(e, client)}
-                          className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                          className="p-2 text-gray-700 rounded-lg transition-colors"
                           title="Edit"
                         >
                           <Edit size={16} />
                         </motion.button>
                         <motion.button
-                          whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={(e) => handleDelete(e, client.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2 text-red-600 rounded-lg transition-colors"
                           title="Delete"
                         >
                           <Trash2 size={16} />
@@ -268,13 +267,15 @@ const Clients = ({ clients: initialClients = [], refreshData, currentUser }) => 
         </motion.div>
       )}
 
+    </motion.div>
+
       {/* Modal */}
       {showModal && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]"
           onClick={() => setShowModal(false)}
         >
           <motion.div
@@ -368,18 +369,16 @@ const Clients = ({ clients: initialClients = [], refreshData, currentUser }) => 
             </div>
             <div className="flex gap-3 mt-8">
               <motion.button
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setShowModal(false)}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200"
+                className="flex-1 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-avis-red border-2 border-avis-red rounded-full transition-all duration-200"
               >
                 Cancel
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSave}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                className="flex-1 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-avis-red rounded-full shadow-md transition-all duration-200"
               >
                 {editingClient ? 'Update' : 'Add'}
               </motion.button>
@@ -387,7 +386,7 @@ const Clients = ({ clients: initialClients = [], refreshData, currentUser }) => 
           </motion.div>
         </motion.div>
       )}
-    </motion.div>
+    </div>
   )
 }
 

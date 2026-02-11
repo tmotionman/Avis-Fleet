@@ -106,9 +106,9 @@ const FleetAssignment = ({
     setShowModal(false)
   }
 
-  const handleReturnVehicle = (assignmentId) => {
+  const handleReturnVehicle = (assignmentId, vehicleId) => {
     // This will automatically set vehicle status back to "Available"
-    onReturnVehicle(assignmentId)
+    onReturnVehicle(assignmentId, vehicleId)
   }
 
   const handleDelete = (id) => {
@@ -129,6 +129,7 @@ const FleetAssignment = ({
   const completedAssignments = assignments.filter(a => a.returnDate)
 
   return (
+    <div className="relative">
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -145,7 +146,7 @@ const FleetAssignment = ({
         <button
           onClick={handleAddClick}
           disabled={availableVehicles.length === 0}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-avis-red to-red-700 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-3 py-1 bg-avis-red text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Plus size={16} />
           New Assignment
@@ -154,24 +155,24 @@ const FleetAssignment = ({
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+        <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
           <div>
-            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Active Assignments</p>
-            <p className="text-3xl font-bold text-white mt-1">{activeAssignments.length}</p>
+            <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Active Assignments</p>
+            <p className="text-3xl font-bold text-avis-black mt-1">{activeAssignments.length}</p>
           </div>
           <div className="w-3 h-3 rounded-full bg-avis-red"></div>
         </div>
-        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+        <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
           <div>
-            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Available Vehicles</p>
-            <p className="text-3xl font-bold text-white mt-1">{availableVehicles.length}</p>
+            <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Available Vehicles</p>
+            <p className="text-3xl font-bold text-avis-black mt-1">{availableVehicles.length}</p>
           </div>
           <div className="w-3 h-3 rounded-full bg-avis-red"></div>
         </div>
-        <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+        <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
           <div>
-            <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Completed</p>
-            <p className="text-3xl font-bold text-white mt-1">{completedAssignments.length}</p>
+            <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Completed</p>
+            <p className="text-3xl font-bold text-avis-black mt-1">{completedAssignments.length}</p>
           </div>
           <div className="w-3 h-3 rounded-full bg-avis-red"></div>
         </div>
@@ -215,7 +216,7 @@ const FleetAssignment = ({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
+                  className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-shadow"
                 >
                   <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
                     <div>
@@ -241,18 +242,16 @@ const FleetAssignment = ({
                       <p className="text-xs text-gray-500 uppercase font-semibold">Actions</p>
                       <div className="flex gap-3 mt-1">
                         <motion.button
-                          whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => handleEditClick(assignment)}
-                          className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                          className="text-xs text-gray-500 transition-colors"
                         >
                           Edit
                         </motion.button>
                         <motion.button
-                          whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          onClick={() => handleReturnVehicle(assignment.id)}
-                          className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                          onClick={() => handleReturnVehicle(assignment.id, assignment.vehicleId)}
+                          className="text-xs text-gray-500 transition-colors"
                         >
                           Return
                         </motion.button>
@@ -307,10 +306,9 @@ const FleetAssignment = ({
                     </div>
                     <div>
                       <motion.button
-                        whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => handleDelete(assignment.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-red-600 rounded-lg transition-colors"
                       >
                         <Trash2 size={18} />
                       </motion.button>
@@ -322,13 +320,15 @@ const FleetAssignment = ({
         </div>
       )}
 
+    </motion.div>
+
       {/* Modal */}
       {showModal && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]"
           onClick={() => setShowModal(false)}
         >
           <motion.div
@@ -421,18 +421,16 @@ const FleetAssignment = ({
             </div>
             <div className="flex gap-3 mt-8">
               <motion.button
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setShowModal(false)}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200"
+                className="flex-1 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-avis-red border-2 border-avis-red rounded-full transition-all duration-200"
               >
                 Cancel
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSave}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                className="flex-1 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-avis-red rounded-full shadow-md transition-all duration-200"
               >
                 {editingAssignment ? 'Update' : 'Assign'}
               </motion.button>
@@ -440,7 +438,7 @@ const FleetAssignment = ({
           </motion.div>
         </motion.div>
       )}
-    </motion.div>
+    </div>
   )
 }
 

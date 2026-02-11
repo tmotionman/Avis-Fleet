@@ -178,6 +178,18 @@ export default {
         const id = path.split('/')[3];
         return await updateUserProfile(id, request, env.DB, allowedOrigin, allowedOrigins);
       }
+      // Upload profile picture (POST /api/upload/profile)
+      if (path === '/api/upload/profile' && method === 'POST') {
+        return await uploadProfilePicture(request, env.BUCKET, allowedOrigin, allowedOrigins);
+      }
+
+      // ============== NOTIFICATIONS ==============
+      if (path === '/api/notifications' && method === 'GET') {
+        return await getNotificationStates(url, env.DB, allowedOrigin, allowedOrigins);
+      }
+      if (path === '/api/notifications' && method === 'POST') {
+        return await updateNotificationState(request, env.DB, allowedOrigin, allowedOrigins);
+      }
 
       // ============== DASHBOARD STATS ==============
       if (path === '/api/stats' && method === 'GET') {
@@ -187,6 +199,11 @@ export default {
       // ============== EXCHANGE RATES ==============
       if (path === '/api/exchange-rates' && method === 'GET') {
         return await getExchangeRates(allowedOrigin, allowedOrigins);
+      }
+
+      // ============== FILES ==============
+      if (path.startsWith('/api/files/')) {
+        return await getFileFromR2(path, env.BUCKET, allowedOrigin, allowedOrigins);
       }
 
       // Health check
@@ -873,25 +890,108 @@ async function updateUserProfile(id, request, db, allowedOrigin, allowedOrigins)
 }
 
 // ============== DASHBOARD STATS ==============
-async function getDashboardStats(db, allowedOrigin, allowedOrigins) {
+async function getDashboardStats(url, db, allowedOrigin, allowedOrigins) {
+  const userId = url.searchParams.get('userId');
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Scoped where clauses
+  const whereUserId = userId ? 'WHERE user_id = ?' : '';
+  const bindUserId = userId ? [userId] : [];
+  
+  // 1. Get current stats
   const [vehicles, clients, assignments, maintenance] = await Promise.all([
-    db.prepare('SELECT COUNT(*) as total, status FROM vehicles GROUP BY status').all(),
-    db.prepare('SELECT COUNT(*) as total FROM clients WHERE status = "Active"').first(),
-    db.prepare('SELECT COUNT(*) as total FROM assignments WHERE status = "Active"').first(),
-    db.prepare('SELECT COUNT(*) as total FROM maintenance_records WHERE status = "In Progress"').first(),
+    db.prepare(`SELECT COUNT(*) as total, status FROM vehicles ${whereUserId} GROUP BY status`).bind(...bindUserId).all(),
+    db.prepare(`SELECT COUNT(*) as total FROM clients WHERE status = "Active" ${userId ? 'AND user_id = ?' : ''}`).bind(...bindUserId).first(),
+    db.prepare(`SELECT COUNT(*) as total FROM assignments WHERE status = "Active" ${userId ? 'AND user_id = ?' : ''}`).bind(...bindUserId).first(),
+    db.prepare(`SELECT COUNT(*) as total FROM maintenance_records WHERE status = "In Progress" ${userId ? 'AND user_id = ?' : ''}`).bind(...bindUserId).first(),
   ]);
   
-  const vehicleStats = vehicles.results.reduce((acc, row) => {
-    acc[row.status.toLowerCase().replace(' ', '_')] = row.total;
-    acc.total = (acc.total || 0) + row.total;
-    return acc;
-  }, {});
+  const vehicleStats = {
+    total: 0,
+    available: 0,
+    on_rent: 0,
+    maintenance: 0
+  };
+  
+  if (vehicles.results) {
+    vehicles.results.forEach(row => {
+      const status = row.status.toLowerCase().replace(' ', '_');
+      vehicleStats[status] = row.total;
+      vehicleStats.total += row.total;
+    });
+  }
+  
+  const currentStats = {
+    total_vehicles: vehicleStats.total,
+    available_vehicles: vehicleStats.available,
+    on_rent_vehicles: vehicleStats.on_rent,
+    maintenance_vehicles: vehicleStats.maintenance,
+    active_clients: clients?.total || 0,
+    active_assignments: assignments?.total || 0,
+    pending_maintenance: maintenance?.total || 0
+  };
+  
+  // 2. Record daily snapshot if it doesn't exist (Only if userId is provided)
+  if (userId) {
+    try {
+      await db.prepare(`
+        INSERT OR IGNORE INTO stats_snapshots (
+          id, user_id, snapshot_date, total_vehicles, available_vehicles, on_rent_vehicles, 
+          maintenance_vehicles, active_clients, active_assignments, pending_maintenance
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        generateId('SNP'), userId, today, 
+        currentStats.total_vehicles, currentStats.available_vehicles, currentStats.on_rent_vehicles,
+        currentStats.maintenance_vehicles, currentStats.active_clients, currentStats.active_assignments, 
+        currentStats.pending_maintenance
+      ).run();
+    } catch (err) {
+      console.error('Failed to create snapshot:', err);
+    }
+  }
+  
+  // 3. Fetch historical snapshot (closest to 30 days ago)
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const dateStr = thirtyDaysAgo.toISOString().split('T')[0];
+  
+  // Get the record on or closest to 30 days ago (but before today)
+  let historicalSnapshot;
+  if (userId) {
+    historicalSnapshot = await db.prepare(`
+      SELECT * FROM stats_snapshots 
+      WHERE user_id = ? AND snapshot_date <= ? AND snapshot_date < ?
+      ORDER BY snapshot_date DESC LIMIT 1
+    `).bind(userId, dateStr, today).first();
+  } else {
+    historicalSnapshot = await db.prepare(`
+      SELECT * FROM stats_snapshots 
+      WHERE snapshot_date <= ? AND snapshot_date < ?
+      ORDER BY snapshot_date DESC LIMIT 1
+    `).bind(dateStr, today).first();
+  }
+  
+  // 4. Calculate trends
+  const calculateTrend = (current, past) => {
+    if (!past || past === 0) return 0;
+    return Math.round(((current - past) / past) * 100);
+  };
+  
+  const trends = {
+    total_vehicles: calculateTrend(currentStats.total_vehicles, historicalSnapshot?.total_vehicles),
+    available_vehicles: calculateTrend(currentStats.available_vehicles, historicalSnapshot?.available_vehicles),
+    on_rent_vehicles: calculateTrend(currentStats.on_rent_vehicles, historicalSnapshot?.on_rent_vehicles),
+    active_clients: calculateTrend(currentStats.active_clients, historicalSnapshot?.active_clients),
+    active_assignments: calculateTrend(currentStats.active_assignments, historicalSnapshot?.active_assignments)
+  };
   
   return jsonResponse({
     vehicles: vehicleStats,
-    activeClients: clients?.total || 0,
-    activeAssignments: assignments?.total || 0,
-    pendingMaintenance: maintenance?.total || 0,
+    activeClients: currentStats.active_clients,
+    activeAssignments: currentStats.active_assignments,
+    pendingMaintenance: currentStats.pending_maintenance,
+    trends,
+    historicalDate: historicalSnapshot?.snapshot_date || null
   }, 200, allowedOrigin, allowedOrigins);
 }
 
@@ -955,14 +1055,142 @@ async function getExchangeRates(allowedOrigin, allowedOrigins) {
   }
 }
 
+// ============== NOTIFICATION HANDLERS ==============
+async function getNotificationStates(url, db, allowedOrigin, allowedOrigins) {
+  const userId = url.searchParams.get('userId');
+  if (!userId) return errorResponse('userId is required', 400, allowedOrigin, allowedOrigins);
+
+  const { results } = await db.prepare(`
+    SELECT notification_id as notificationId, is_read as isRead, is_dismissed as isDismissed
+    FROM notification_states WHERE user_id = ?
+  `).bind(userId).all();
+
+  return jsonResponse(results, 200, allowedOrigin, allowedOrigins);
+}
+
+async function updateNotificationState(request, db, allowedOrigin, allowedOrigins) {
+  const data = await request.json();
+  const { userId, notificationId, isRead, isDismissed } = data;
+
+  if (!userId || !notificationId) {
+    return errorResponse('userId and notificationId are required', 400, allowedOrigin, allowedOrigins);
+  }
+
+  const id = `${userId}_${notificationId}`;
+
+  await db.prepare(`
+    INSERT INTO notification_states (id, user_id, notification_id, is_read, is_dismissed, updated_at)
+    VALUES (?, ?, ?, ?, ?, datetime('now'))
+    ON CONFLICT(id) DO UPDATE SET
+      is_read = CASE WHEN ? IS NOT NULL THEN ? ELSE is_read END,
+      is_dismissed = CASE WHEN ? IS NOT NULL THEN ? ELSE is_dismissed END,
+      updated_at = datetime('now')
+  `).bind(
+    id,
+    userId,
+    notificationId,
+    isRead !== undefined ? (isRead ? 1 : 0) : 0,
+    isDismissed !== undefined ? (isDismissed ? 1 : 0) : 0,
+    isRead !== undefined ? 1 : null,
+    isRead !== undefined ? (isRead ? 1 : 0) : null,
+    isDismissed !== undefined ? 1 : null,
+    isDismissed !== undefined ? (isDismissed ? 1 : 0) : null
+  ).run();
+
+  return jsonResponse({ message: 'Notification state updated' }, 200, allowedOrigin, allowedOrigins);
+}
+
+// ============== FILE HANDLERS ==============
+async function uploadProfilePicture(request, bucket, allowedOrigin, allowedOrigins) {
+  try {
+    const formData = await request.formData();
+    const file = formData.get('file');
+    const userId = formData.get('userId');
+
+    if (!file || !userId) {
+      return errorResponse('Missing file or userId', 400, allowedOrigin, allowedOrigins);
+    }
+
+    const extension = file.name.split('.').pop() || 'jpg';
+    const key = `avatars/${userId}-${Date.now()}.${extension}`;
+
+    await bucket.put(key, file.stream(), {
+      httpMetadata: { contentType: file.type },
+    });
+
+    // Return the URL to access the file via the worker
+    const url = `/api/files/${key}`;
+    return jsonResponse({ url, key, message: 'Upload successful' }, 201, allowedOrigin, allowedOrigins);
+  } catch (error) {
+    return errorResponse('Upload failed: ' + error.message, 500, allowedOrigin, allowedOrigins);
+  }
+}
+
+async function getFileFromR2(path, bucket, allowedOrigin, allowedOrigins) {
+  const key = path.replace('/api/files/', '');
+  const object = await bucket.get(key);
+
+  if (!object) {
+    return errorResponse('File not found', 404, allowedOrigin, allowedOrigins);
+  }
+
+  const headers = new Headers();
+  object.writeHttpMetadata(headers);
+  headers.set('etag', object.httpEtag);
+  headers.set('Access-Control-Allow-Origin', allowedOrigin);
+  headers.set('Cache-Control', 'public, max-age=31536000');
+
+  return new Response(object.body, {
+    headers,
+  });
+}
+
 // Parse Bank of Zambia HTML for exchange rates
 function parseBoZRates(html) {
   try {
-    // The Bank of Zambia website structure changes frequently
-    // A reliable parsing method would require API access or constant HTML structure monitoring
-    // For now, return null to use cached fallback rates which are more reliable
-    // TODO: Consider using an alternative exchange rate API (e.g., exchangerate-api.com, fixer.io)
-    return null;
+    const rates = [];
+    
+    // Extract USD rate from Market Average row in the commercial banks table
+    // Looking for: <th scope="row">Market Average</th> followed by buy/sell rates
+    const marketAvgMatch = html.match(/<th[^>]*>Market Average<\/th>\s*<td[^>]*>([\d.]+)<\/td>\s*<td[^>]*>([\d.]+)<\/td>/i);
+    
+    if (marketAvgMatch) {
+      rates.push({
+        currency: 'USD',
+        buy: parseFloat(marketAvgMatch[1]),
+        sell: parseFloat(marketAvgMatch[2])
+      });
+    }
+    
+    // For GBP, EUR, ZAR - try to find them in the homepage widgets section
+    // These are typically in tables with class "table table-striped"
+    const currencies = ['GBP', 'EUR', 'ZAR'];
+    
+    for (const currency of currencies) {
+      // Look for currency code followed by rates in nearby td elements
+      const pattern = new RegExp(`${currency}[\\s\\S]{0,200}?<td[^>]*align="right"[^>]*>(\\d+\\.\\d+)<\\/td>[\\s\\S]{0,100}?<td[^>]*align="right"[^>]*>(\\d+\\.\\d+)<\\/td>`, 'i');
+      const match = html.match(pattern);
+      
+      if (match) {
+        rates.push({
+          currency: currency,
+          buy: parseFloat(match[1]),
+          sell: parseFloat(match[2])
+        });
+      }
+    }
+    
+    // Fallback: if we only got USD, add placeholder rates for others
+    if (rates.length === 1 && rates[0].currency === 'USD') {
+      const usdRate = (rates[0].buy + rates[0].sell) / 2;
+      rates.push(
+        { currency: 'GBP', buy: usdRate * 1.27, sell: usdRate * 1.28 },
+        { currency: 'EUR', buy: usdRate * 1.08, sell: usdRate * 1.09 },
+        { currency: 'ZAR', buy: usdRate * 0.054, sell: usdRate * 0.056 }
+      );
+    }
+
+    return rates.length > 0 ? rates : null;
   } catch (e) {
     console.error('Parse BoZ rates error:', e);
     return null;

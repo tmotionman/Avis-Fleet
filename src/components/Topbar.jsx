@@ -1,9 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Menu, Search, Bell, User, LogOut, Settings, ChevronDown, Upload, X } from 'lucide-react'
+import { Menu, Bell, User, LogOut, Settings, ChevronDown, Upload, X } from 'lucide-react'
 import { motion } from 'framer-motion'
 import AvisLogoWebp from '../assets/Avis.webp'
 import CustomSelect from './CustomSelect'
-import { usersApi } from '../lib/d1Client'
+import { usersApi, API_BASE_URL } from '../lib/d1Client'
+
+// Helper to get full avatar URL
+const getAvatarUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('data:') || url.startsWith('http')) return url;
+  return `${API_BASE_URL}${url}`;
+};
 
 // Profile Modal Component - Extracted to prevent re-mounting on parent re-render
 const ProfileModal = ({ showProfileModal, setShowProfileModal, profileData, setProfileData, dragActive, setDragActive, fileInputRef, handleDrag, handleDrop, handleInputChange, removeProfilePhoto, handleProfileSave, isSaving }) => {
@@ -24,7 +31,7 @@ const ProfileModal = ({ showProfileModal, setShowProfileModal, profileData, setP
           <h2 className="text-lg font-semibold text-gray-900">My Profile</h2>
           <button
             onClick={() => setShowProfileModal(false)}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400"
           >
             ✕
           </button>
@@ -41,7 +48,7 @@ const ProfileModal = ({ showProfileModal, setShowProfileModal, profileData, setP
               className={`relative border-2 border-dashed rounded-lg p-3 text-center transition-colors ${
                 dragActive 
                   ? 'border-avis-red bg-red-50' 
-                  : 'border-gray-300 hover:border-avis-red'
+                  : 'border-gray-300'
               }`}
             >
               <input
@@ -56,7 +63,7 @@ const ProfileModal = ({ showProfileModal, setShowProfileModal, profileData, setP
                 <div className="space-y-2">
                   <div className="w-20 h-20 mx-auto rounded-lg overflow-hidden border border-gray-200">
                     <img 
-                      src={profileData.profilePhoto} 
+                      src={getAvatarUrl(profileData.profilePhoto)} 
                       alt="Profile Preview"
                       className="w-full h-full object-cover"
                     />
@@ -64,7 +71,7 @@ const ProfileModal = ({ showProfileModal, setShowProfileModal, profileData, setP
                   <button
                     type="button"
                     onClick={removeProfilePhoto}
-                    className="flex items-center justify-center gap-2 w-full px-3 py-1.5 text-xs font-medium text-avis-red border border-avis-red rounded-lg hover:bg-red-50 transition-colors"
+                    className="flex items-center justify-center gap-2 w-full px-3 py-1.5 text-xs font-medium text-avis-red border border-avis-red rounded-lg transition-colors"
                   >
                     <X size={12} />
                     Remove
@@ -145,20 +152,18 @@ const ProfileModal = ({ showProfileModal, setShowProfileModal, profileData, setP
         </div>
         <div className="flex justify-end gap-3 p-4 border-t border-gray-200">
           <motion.button
-            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowProfileModal(false)}
             disabled={isSaving}
-            className="px-4 py-2 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200 disabled:opacity-50"
+            className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-avis-red border-2 border-avis-red rounded-full transition-all duration-200 disabled:opacity-50"
           >
             Cancel
           </motion.button>
           <motion.button
-            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleProfileSave}
             disabled={isSaving}
-            className="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50"
+            className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-white bg-avis-red rounded-full shadow-md transition-all duration-200 disabled:opacity-50"
           >
             {isSaving ? 'Saving...' : 'Save Changes'}
           </motion.button>
@@ -187,7 +192,7 @@ const SettingsModal = ({ showSettingsModal, setShowSettingsModal, settings, setS
           <h2 className="text-xl font-semibold text-gray-900">Settings</h2>
           <button
             onClick={() => setShowSettingsModal(false)}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400"
           >
             ✕
           </button>
@@ -252,18 +257,16 @@ const SettingsModal = ({ showSettingsModal, setShowSettingsModal, settings, setS
         </div>
         <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
           <motion.button
-            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowSettingsModal(false)}
-            className="px-4 py-2.5 text-sm font-semibold text-avis-red border-2 border-avis-red rounded-lg hover:bg-red-50 transition-all duration-200"
+            className="px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-avis-red border-2 border-avis-red rounded-full transition-all duration-200"
           >
             Cancel
           </motion.button>
           <motion.button
-            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowSettingsModal(false)}
-            className="px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+            className="px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-avis-red rounded-full shadow-md transition-all duration-200"
           >
             Save Changes
           </motion.button>
@@ -273,20 +276,25 @@ const SettingsModal = ({ showSettingsModal, setShowSettingsModal, settings, setS
   )
 }
 
+// Removed local notification generation in favor of Context
+import { useNotifications } from '../context/NotificationContext'
+
 const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileUpdate, vehicles = [], clients = [], users = [] }) => {
+  const { notifications, unreadCount, markAsRead, markAllAsRead, dismissNotification, readIds } = useNotifications()
   const [profileOpen, setProfileOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
-  const [notificationsViewed, setNotificationsViewed] = useState(false)
+  // notificationsViewed is now derived from context state (unreadCount === 0), but for the badge we use unreadCount directly.
+  // We can keep a local state for the dropdown open/close only.
+  
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [selectedFile, setSelectedFile] = useState(null)
   const fileInputRef = useRef(null)
   const modalContentRef = useRef(null)
-  const searchRef = useRef(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState([])
-  const [showSearchResults, setShowSearchResults] = useState(false)
+  const notificationsRef = useRef(null)
+  const profileMenuRef = useRef(null)
   const [savedProfilePhoto, setSavedProfilePhoto] = useState(currentUser?.avatarUrl || null)
   const [profileData, setProfileData] = useState({
     name: currentUser?.name || 'User',
@@ -305,72 +313,6 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
     language: 'English',
   })
 
-  // Generate real notifications from app data
-  const generateNotifications = () => {
-    const notifs = []
-
-    // Check for vehicles needing maintenance (mileage > 80000 km)
-    const vehiclesNeedingMaintenance = vehicles.filter(v => v.mileage && v.mileage > 80000)
-    if (vehiclesNeedingMaintenance.length > 0) {
-      notifs.push({
-        id: `maint-${vehiclesNeedingMaintenance[0].id}`,
-        message: `${vehiclesNeedingMaintenance.length} vehicle(s) due for maintenance (mileage > 80,000 km)`,
-        priority: 'high',
-        type: 'maintenance',
-        data: vehiclesNeedingMaintenance
-      })
-    }
-
-    // Check for vehicles with "In Service" status
-    const vehiclesInService = vehicles.filter(v => v.status === 'In Service')
-    if (vehiclesInService.length > 0) {
-      notifs.push({
-        id: `in-service-${Date.now()}`,
-        message: `${vehiclesInService.length} vehicle(s) currently in service`,
-        priority: 'medium',
-        type: 'status',
-        data: vehiclesInService
-      })
-    }
-
-    // Check for unassigned vehicles
-    const unassignedVehicles = vehicles.filter(v => !v.assignedTo)
-    if (unassignedVehicles.length > 0) {
-      notifs.push({
-        id: `unassigned-${Date.now()}`,
-        message: `${unassignedVehicles.length} vehicle(s) available for assignment`,
-        priority: 'medium',
-        type: 'available',
-        data: unassignedVehicles
-      })
-    }
-
-    // Check for clients with pending assignments
-    if (clients.length > 10) {
-      notifs.push({
-        id: `clients-${Date.now()}`,
-        message: `You have ${clients.length} clients in the system`,
-        priority: 'low',
-        type: 'info',
-        count: clients.length
-      })
-    }
-
-    // Add general summary if no other notifications
-    if (notifs.length === 0) {
-      notifs.push({
-        id: 'summary',
-        message: `Fleet Summary: ${vehicles.length} vehicles, ${clients.length} clients`,
-        priority: 'low',
-        type: 'info'
-      })
-    }
-
-    return notifs
-  }
-
-  const notifications = generateNotifications()
-
   const handleProfileSave = async () => {
     setIsSaving(true)
     try {
@@ -381,34 +323,49 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
         return
       }
       
+      let finalAvatarUrl = profileData.profilePhoto
+      
+      // If a new file was selected, upload to R2 first
+      if (selectedFile) {
+        try {
+          const uploadResult = await usersApi.uploadProfilePicture(selectedFile, userId)
+          finalAvatarUrl = uploadResult.url
+        } catch (uploadError) {
+          console.error('R2 Upload failed:', uploadError)
+          alert('Warning: Failed to upload photo to Cloudflare Storage. The photo will be saved but may not be accessible across all devices.')
+          // Fallback to Base64 is already in finalAvatarUrl from profileData.profilePhoto
+        }
+      }
+      
       // Prepare update data
       const updateData = {
         name: profileData.name,
         email: profileData.email,
-        avatarUrl: profileData.profilePhoto, // Base64 or URL
+        avatarUrl: finalAvatarUrl,
       }
       
       // Call API to update profile
       const updatedUser = await usersApi.updateProfile(userId, updateData)
       
       // Update local state
-      setSavedProfilePhoto(profileData.profilePhoto)
+      setSavedProfilePhoto(finalAvatarUrl)
+      setSelectedFile(null)
       
-      // Update localStorage with minimal data (NOT storing Base64 photo to avoid quota exceeded)
+      // Update localStorage with data
       const newUserData = {
         id: currentUser?.id,
         name: updatedUser.name,
         email: updatedUser.email,
         role: currentUser?.role,
-        // Don't store avatarUrl in localStorage - it will be fetched from DB on next login
+        avatarUrl: finalAvatarUrl,
       }
       localStorage.setItem('avis_currentUser', JSON.stringify(newUserData))
       
-      // Notify parent to update currentUser state with the avatar URL
+      // Notify parent to update currentUser state
       if (onProfileUpdate) {
         onProfileUpdate({
           ...newUserData,
-          avatarUrl: updatedUser.avatarUrl,
+          avatarUrl: finalAvatarUrl,
         })
       }
       
@@ -427,6 +384,7 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
 
   const handleFileSelect = (file) => {
     if (file && file.type.startsWith('image/')) {
+      setSelectedFile(file)
       const reader = new FileReader()
       reader.onload = (e) => {
         setProfileData({ ...profileData, profilePhoto: e.target.result })
@@ -465,84 +423,22 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
 
   const removeProfilePhoto = () => {
     setProfileData({ ...profileData, profilePhoto: null })
+    setSelectedFile(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
   }
-
-  // Handle search functionality
-  const handleSearch = (query) => {
-    setSearchQuery(query)
-    
-    if (!query.trim()) {
-      setSearchResults([])
-      setShowSearchResults(false)
-      return
-    }
-
-    const lowerQuery = query.toLowerCase()
-    const results = []
-
-    // Search vehicles
-    vehicles.forEach(vehicle => {
-      if (
-        vehicle.registrationNo?.toLowerCase().includes(lowerQuery) ||
-        vehicle.model?.toLowerCase().includes(lowerQuery) ||
-        vehicle.location?.toLowerCase().includes(lowerQuery)
-      ) {
-        results.push({
-          type: 'vehicle',
-          id: vehicle.id,
-          title: vehicle.registrationNo,
-          subtitle: vehicle.model,
-          data: vehicle,
-        })
-      }
-    })
-
-    // Search clients
-    clients.forEach(client => {
-      if (
-        client.name?.toLowerCase().includes(lowerQuery) ||
-        client.email?.toLowerCase().includes(lowerQuery) ||
-        client.phone?.toLowerCase().includes(lowerQuery) ||
-        client.city?.toLowerCase().includes(lowerQuery)
-      ) {
-        results.push({
-          type: 'client',
-          id: client.id,
-          title: client.name,
-          subtitle: client.city || client.email,
-          data: client,
-        })
-      }
-    })
-
-    // Search users
-    users.forEach(user => {
-      if (
-        user.name?.toLowerCase().includes(lowerQuery) ||
-        user.email?.toLowerCase().includes(lowerQuery)
-      ) {
-        results.push({
-          type: 'user',
-          id: user.id,
-          title: user.name,
-          subtitle: user.email,
-          data: user,
-        })
-      }
-    })
-
-    setSearchResults(results.slice(0, 8)) // Limit to 8 results
-    setShowSearchResults(query.trim().length > 0)
-  }
-
-  // Close search results when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setShowSearchResults(false)
+      // Handle notifications dropdown
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setNotificationsOpen(false)
+      }
+      
+      // Handle profile dropdown
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setProfileOpen(false)
       }
     }
 
@@ -550,27 +446,13 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Keyboard shortcut for search (Ctrl+K or Cmd+K)
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault()
-        document.querySelector('input[placeholder="Search vehicles, users..."]')?.focus()
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [])
-
-
   return (
-    <div className="fixed top-0 left-0 right-0 lg:left-64 z-40 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
+    <div className="fixed top-0 left-0 right-0 lg:left-64 z-40 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
       {/* Left Section */}
       <div className="flex items-center gap-4">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="lg:hidden text-gray-600 hover:text-avis-red transition-colors"
+          className="lg:hidden text-gray-600 transition-colors"
         >
           <Menu size={24} />
         </button>
@@ -581,82 +463,23 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
 
       {/* Right Section */}
       <div className="flex items-center gap-6">
-        {/* Search Bar */}
-        <div ref={searchRef} className="hidden md:block relative">
-          <div className="flex items-center bg-gray-100 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-avis-red transition-all">
-            <Search size={18} className="text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search vehicles, users... (Ctrl+K)"
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              onFocus={() => searchQuery && setShowSearchResults(true)}
-              className="bg-transparent ml-2 outline-none text-sm w-40"
-            />
-          </div>
-
-          {/* Search Results Dropdown */}
-          {showSearchResults && searchResults.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto"
-            >
-              {searchResults.map((result, index) => (
-                <div
-                  key={`${result.type}-${result.id}`}
-                  className="px-4 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50 cursor-pointer transition-colors"
-                >
-                  <div className="flex items-start gap-3">
-                    {/* Type Badge */}
-                    <div className={`px-2 py-1 rounded text-xs font-semibold text-white flex-shrink-0 ${
-                      result.type === 'vehicle' ? 'bg-blue-500' :
-                      result.type === 'client' ? 'bg-green-500' :
-                      'bg-purple-500'
-                    }`}>
-                      {result.type === 'vehicle' ? 'Vehicle' :
-                       result.type === 'client' ? 'Client' :
-                       'User'}
-                    </div>
-                    
-                    {/* Result Content */}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 truncate">{result.title}</p>
-                      <p className="text-xs text-gray-500 truncate">{result.subtitle}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </motion.div>
-          )}
-
-          {/* No Results Message */}
-          {showSearchResults && searchResults.length === 0 && searchQuery && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 p-4 text-center"
-            >
-              <p className="text-sm text-gray-500">No results found for "{searchQuery}"</p>
-            </motion.div>
-          )}
-        </div>
 
         {/* Notifications */}
-        <div className="relative">
+        <div className="relative" ref={notificationsRef}>
           <button
             onClick={() => {
               setNotificationsOpen(!notificationsOpen)
-              setNotificationsViewed(true)
+              if (!notificationsOpen && unreadCount > 0) {
+                 // Optional: mark all as read immediately on open, or let user click individually
+                 // For now, let's keep the red dot logic simple: unreadCount drives it
+              }
             }}
-            className="relative p-2 text-gray-600 hover:text-avis-red hover:bg-gray-100 rounded-lg transition-all"
+            className="relative p-2 text-gray-600 rounded-lg transition-all"
           >
             <Bell size={20} />
-            {notifications.length > 0 && !notificationsViewed && (
+            {unreadCount > 0 && (
               <span className="absolute top-0 right-0 w-5 h-5 bg-avis-red text-white text-xs font-bold rounded-full flex items-center justify-center">
-                {notifications.length > 9 ? '9+' : notifications.length}
+                {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
           </button>
@@ -669,26 +492,52 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
               exit={{ opacity: 0, y: -10 }}
               className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 border border-gray-200"
             >
-              <div className="p-4 border-b border-gray-200">
+              <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
                 <h3 className="font-semibold text-avis-black">Notifications</h3>
+                {unreadCount > 0 && (
+                  <button 
+                    onClick={markAllAsRead}
+                    className="text-xs text-avis-red font-medium"
+                  >
+                    Mark all read
+                  </button>
+                )}
               </div>
               <div className="max-h-96 overflow-y-auto">
-                {notifications.length > 0 ? notifications.map((notif) => (
-                  <div key={notif.id} className="p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors last:border-0">
+                {notifications.length > 0 ? notifications.map((notif) => {
+                  const isRead = readIds.includes(notif.id)
+                  
+                  return (
+                  <div 
+                    key={notif.id} 
+                    onClick={() => markAsRead(notif.id)}
+                    className={`p-4 border-b border-gray-100 cursor-pointer transition-colors last:border-0 relative group ${!isRead ? 'bg-red-50/30' : ''}`}
+                  >
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            dismissNotification(notif.id)
+                        }}
+                        className="absolute top-2 right-2 p-1 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Dismiss"
+                    >
+                        <X size={14} />
+                    </button>
+                    
                     <div className="flex items-start gap-3">
                       <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
                         notif.priority === 'high' ? 'bg-avis-red' :
                         notif.priority === 'medium' ? 'bg-yellow-500' :
                         'bg-blue-500'
                       }`}></div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-700 font-medium">{notif.message}</p>
+                      <div className="flex-1 min-w-0 pr-4">
+                        <p className={`text-sm font-medium ${isRead ? 'text-gray-500' : 'text-gray-900'}`}>{notif.message}</p>
                         
                         {/* Show vehicle details if applicable */}
                         {notif.data && Array.isArray(notif.data) && notif.data.length > 0 && (
                           <div className="mt-2 space-y-1">
                             {notif.data.slice(0, 3).map((item, idx) => (
-                              <div key={idx} className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
+                              <div key={idx} className="text-xs text-gray-500 bg-white border border-gray-200 px-2 py-1 rounded shadow-sm">
                                 {item.registrationNo || item.name} {item.model && `- ${item.model}`}
                               </div>
                             ))}
@@ -699,10 +548,11 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
                             )}
                           </div>
                         )}
+                        <p className="text-xs text-gray-400 mt-1">{new Date(notif.date || Date.now()).toLocaleDateString()}</p>
                       </div>
                     </div>
                   </div>
-                )) : (
+                )}) : (
                   <div className="p-6 text-center">
                     <p className="text-sm text-gray-400">No notifications</p>
                   </div>
@@ -713,14 +563,14 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
         </div>
 
         {/* Profile Menu */}
-        <div className="relative">
+        <div className="relative" ref={profileMenuRef}>
           <button
             onClick={() => setProfileOpen(!profileOpen)}
-            className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-all"
+            className="flex items-center gap-2 p-2 rounded-lg transition-all"
           >
             {savedProfilePhoto ? (
               <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
-                <img src={savedProfilePhoto} alt="Profile" className="w-full h-full object-cover" />
+                <img src={getAvatarUrl(savedProfilePhoto)} alt="Profile" className="w-full h-full object-cover" />
               </div>
             ) : (
               <div className="w-8 h-8 bg-avis-red rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
@@ -753,7 +603,7 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
                     setShowProfileModal(true)
                     setProfileOpen(false)
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors text-sm text-gray-700"
+                  className="w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm text-gray-700"
                 >
                   <User size={16} />
                   <span>My Profile</span>
@@ -765,7 +615,7 @@ const Topbar = ({ currentUser, sidebarOpen, setSidebarOpen, onLogout, onProfileU
                     onLogout()
                     setProfileOpen(false)
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-2 hover:bg-red-50 rounded-lg transition-colors text-sm text-avis-red font-medium"
+                  className="w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm text-avis-red font-medium"
                 >
                   <LogOut size={16} />
                   <span>Logout</span>

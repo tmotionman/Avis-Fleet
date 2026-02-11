@@ -13,6 +13,7 @@ import UserManagement from './pages/UserManagement'
 import Help from './pages/Help'
 import { vehiclesApi, clientsApi, assignmentsApi } from './lib/d1Client'
 import { dummyVehicles, dummyClients, dummyAssignments } from './data/dummyTourData'
+import { NotificationProvider } from './context/NotificationContext'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -165,11 +166,12 @@ function App() {
   }
 
   // Handler: Return vehicle (changes status back to "Available")
-  const handleReturnVehicle = async (assignmentId) => {
+  const handleReturnVehicle = async (assignmentId, vehicleId) => {
     try {
       const userId = currentUser?.id || currentUser?.email
       await assignmentsApi.update(assignmentId, { 
         status: 'Completed',
+        vehicleId: vehicleId,
         returnDate: new Date().toISOString().split('T')[0]
       }, userId)
       await refreshData()
@@ -314,7 +316,7 @@ function App() {
           <p className="text-sm text-gray-500 mb-4">{dataError}</p>
           <button 
             onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-avis-red text-white rounded-lg hover:bg-red-700 transition-colors"
+            className="px-4 py-2 bg-avis-red text-white rounded-lg transition-colors"
           >
             Try Again
           </button>
@@ -331,6 +333,7 @@ function App() {
             vehicles={vehicles} 
             clients={clients}
             assignments={assignments} 
+            currentUser={currentUser}
             onNavigate={setCurrentPage} 
           />
         )
@@ -370,42 +373,39 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sidebar - fixed, doesn't affect layout */}
-      <Sidebar
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-      />
-
-      {/* Main Content with left margin for always-expanded sidebar */}
-      <div className="flex flex-col min-h-screen justify-start pt-16 lg:ml-64">
-        {/* Topbar */}
-        <Topbar 
-          currentUser={currentUser} 
-          sidebarOpen={sidebarOpen} 
-          setSidebarOpen={setSidebarOpen} 
-          onLogout={handleLogout}
-          onProfileUpdate={setCurrentUser}
-          vehicles={vehicles}
-          clients={clients}
-          users={users}
+    <NotificationProvider vehicles={vehicles} clients={clients} assignments={assignments} currentUser={currentUser}>
+      <div className="min-h-screen bg-gray-50">
+        <Sidebar
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
         />
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-auto min-h-0">
-          {renderPage()}
-        </main>
-      </div>
+        <div className="flex flex-col min-h-screen justify-start pt-16 lg:ml-64">
+          <Topbar 
+            currentUser={currentUser} 
+            sidebarOpen={sidebarOpen} 
+            setSidebarOpen={setSidebarOpen} 
+            onLogout={handleLogout}
+            onProfileUpdate={setCurrentUser}
+            vehicles={vehicles}
+            clients={clients}
+            users={users}
+          />
 
-      {/* Onboarding Tour for new users */}
-      <OnboardingTour 
-        isOpen={showTour}
-        onClose={handleTourComplete}
-        onNavigate={setCurrentPage} 
-      />
-    </div>
+          <main className="flex-1 overflow-auto min-h-0">
+            {renderPage()}
+          </main>
+        </div>
+
+        <OnboardingTour 
+          isOpen={showTour}
+          onClose={handleTourComplete}
+          onNavigate={setCurrentPage} 
+        />
+      </div>
+    </NotificationProvider>
   )
 }
 

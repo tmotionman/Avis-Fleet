@@ -272,7 +272,7 @@ const Login = ({ onLogin, onSignup }) => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
                   >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
@@ -307,7 +307,7 @@ const Login = ({ onLogin, onSignup }) => {
                     <input type="checkbox" className="w-4 h-4 rounded border-gray-300 cursor-pointer" />
                     Remember me
                   </label>
-                  <a href="#" className="text-avis-red hover:text-red-700 font-medium">
+                  <a href="#" className="text-avis-red font-medium">
                     Forgot password?
                   </a>
                 </div>
@@ -315,11 +315,10 @@ const Login = ({ onLogin, onSignup }) => {
 
               {/* Submit Button */}
               <motion.button
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 bg-gradient-to-r from-avis-red to-red-700 text-white font-bold rounded-lg hover:shadow-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-3 bg-avis-red text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>
@@ -339,7 +338,7 @@ const Login = ({ onLogin, onSignup }) => {
                 <button
                   type="button"
                   onClick={switchMode}
-                  className="text-avis-red hover:text-red-700 font-semibold"
+                  className="text-avis-red font-semibold"
                 >
                   {isSignupMode ? 'Sign In' : 'Sign Up'}
                 </button>
@@ -353,7 +352,7 @@ const Login = ({ onLogin, onSignup }) => {
                 <button
                   type="button"
                   onClick={() => setShowTerms(true)}
-                  className="text-avis-red hover:text-red-700 font-medium underline"
+                  className="text-avis-red font-medium underline"
                 >
                   Terms of Service
                 </button>{' '}
@@ -361,7 +360,7 @@ const Login = ({ onLogin, onSignup }) => {
                 <button
                   type="button"
                   onClick={() => setShowPrivacy(true)}
-                  className="text-avis-red hover:text-red-700 font-medium underline"
+                  className="text-avis-red font-medium underline"
                 >
                   Privacy Policy
                 </button>
@@ -388,7 +387,7 @@ const Login = ({ onLogin, onSignup }) => {
           >
             <h2 className="text-2xl font-bold text-avis-black mb-6">Terms of Service</h2>
             <div className="prose prose-sm text-gray-700 space-y-4">
-              <p className="text-sm"><strong>Last Updated:</strong> December 1, 2025</p>
+              <p className="text-sm"><strong>Last Updated:</strong> February 11, 2026</p>
               
               <h3 className="text-lg font-semibold text-avis-black mt-4">1. Acceptance of Terms</h3>
               <p className="text-sm">By accessing and using the Avis Fleet Management System, you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.</p>
@@ -413,10 +412,9 @@ const Login = ({ onLogin, onSignup }) => {
             </div>
             <div className="mt-6 flex justify-end">
               <motion.button
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setShowTerms(false)}
-                className="px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                className="px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-avis-red rounded-full shadow-md transition-all duration-200"
               >
                 Close
               </motion.button>
@@ -443,7 +441,7 @@ const Login = ({ onLogin, onSignup }) => {
           >
             <h2 className="text-2xl font-bold text-avis-black mb-6">Privacy Policy</h2>
             <div className="prose prose-sm text-gray-700 space-y-4">
-              <p className="text-sm"><strong>Last Updated:</strong> December 1, 2025</p>
+              <p className="text-sm"><strong>Last Updated:</strong> February 11, 2026</p>
               
               <h3 className="text-lg font-semibold text-avis-black mt-4">1. Information We Collect</h3>
               <p className="text-sm">We collect information you provide directly to us, including name, email address, and other contact information necessary for fleet management operations.</p>
@@ -471,10 +469,9 @@ const Login = ({ onLogin, onSignup }) => {
             </div>
             <div className="mt-6 flex justify-end">
               <motion.button
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setShowPrivacy(false)}
-                className="px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-avis-red to-red-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                className="px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-avis-red rounded-full shadow-md transition-all duration-200"
               >
                 Close
               </motion.button>

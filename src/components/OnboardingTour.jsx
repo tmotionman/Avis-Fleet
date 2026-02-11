@@ -141,7 +141,7 @@ const OnboardingTour = ({ isOpen, onClose, onNavigate }) => {
               {/* Close Button */}
               <button
                 onClick={handleSkip}
-                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-full transition-colors z-10"
+                className="absolute top-4 right-4 p-2 text-gray-400 rounded-full transition-colors z-10"
               >
                 <X size={20} />
               </button>
@@ -185,10 +185,9 @@ const OnboardingTour = ({ isOpen, onClose, onNavigate }) => {
                 <div className="flex gap-3">
                   {!isFirstStep && (
                     <motion.button
-                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={handlePrev}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-gray-300 border border-gray-600 rounded-xl hover:bg-gray-700 transition-colors font-medium"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-gray-300 border border-gray-600 rounded-xl transition-colors font-medium"
                     >
                       <ChevronLeft size={18} />
                       Back
@@ -196,10 +195,9 @@ const OnboardingTour = ({ isOpen, onClose, onNavigate }) => {
                   )}
                   
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleNext}
-                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-avis-red text-white rounded-xl hover:bg-red-700 transition-colors font-medium ${
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-avis-red text-white rounded-xl transition-colors font-medium ${
                       isFirstStep ? 'w-full' : ''
                     }`}
                   >
@@ -212,7 +210,7 @@ const OnboardingTour = ({ isOpen, onClose, onNavigate }) => {
                 {!isLastStep && (
                   <button
                     onClick={handleSkip}
-                    className="w-full mt-4 text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                    className="w-full mt-4 text-sm text-gray-500 transition-colors"
                   >
                     Skip tour
                   </button>

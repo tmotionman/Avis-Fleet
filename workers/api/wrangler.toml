@@ -9,6 +9,11 @@ binding = "DB"
 database_name = "avis-fleet-db"
 database_id = "419bed2e-153e-45f6-bd7b-8a815a772a7f"
 
+# R2 Bucket binding
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "avis-fleet-uploads"
+
 # Environment variables
 [vars]
 ENVIRONMENT = "production"
@@ -22,6 +27,10 @@ name = "avis-fleet-api-dev"
 binding = "DB"
 database_name = "avis-fleet-db"
 database_id = "419bed2e-153e-45f6-bd7b-8a815a772a7f"
+
+[[env.dev.r2_buckets]]
+binding = "BUCKET"
+bucket_name = "avis-fleet-uploads"
 
 [env.dev.vars]
 ENVIRONMENT = "development"

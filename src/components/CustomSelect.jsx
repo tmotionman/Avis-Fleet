@@ -99,7 +99,7 @@ const CustomSelect = ({ label, value, onChange, options, placeholder, icon: Icon
         onClick={() => setIsOpen(!isOpen)}
         className={`
           w-full px-4 py-2 border rounded-lg cursor-pointer flex items-center justify-between bg-white transition-all duration-200
-          ${isOpen ? 'border-avis-red ring-2 ring-avis-red/20' : 'border-gray-300 hover:border-avis-red/50'}
+          ${isOpen ? 'border-avis-red ring-2 ring-avis-red/20' : 'border-gray-300'}
         `}
       >
         <div className="flex items-center gap-2 overflow-hidden">
@@ -148,7 +148,7 @@ const CustomSelect = ({ label, value, onChange, options, placeholder, icon: Icon
                       }}
                       className={`
                         px-4 py-2.5 text-sm cursor-pointer flex items-center justify-between transition-colors
-                        ${isSelected ? 'bg-red-50 text-avis-red font-medium' : 'text-gray-700 hover:bg-gray-50'}
+                        ${isSelected ? 'bg-red-50 text-avis-red font-medium' : 'text-gray-700'}
                       `}
                     >
                       <span>{optLabel}</span>

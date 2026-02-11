@@ -5,7 +5,7 @@
     "model": "Toyota Corolla 1.6",
     "year": 2023,
     "status": "Available",
-    "lastServiceDate": "2025-10-15",
+    "lastServiceDate": "2026-10-15",
     "location": "Lusaka",
     "assignedTo": "John Smith"
   },
@@ -15,7 +15,7 @@
     "model": "Hyundai i20 1.4",
     "year": 2023,
     "status": "On Rent",
-    "lastServiceDate": "2025-09-20",
+    "lastServiceDate": "2026-09-20",
     "location": "Ndola",
     "assignedTo": "Sarah Johnson"
   },
@@ -25,7 +25,7 @@
     "model": "Nissan Qashqai 1.6",
     "year": 2022,
     "status": "Available",
-    "lastServiceDate": "2025-08-10",
+    "lastServiceDate": "2026-08-10",
     "location": "Kitwe",
     "assignedTo": "Mike Davis"
   },
@@ -35,7 +35,7 @@
     "model": "Renault Sandero 1.0",
     "year": 2023,
     "status": "Available",
-    "lastServiceDate": "2025-10-01",
+    "lastServiceDate": "2026-10-01",
     "location": "Lusaka",
     "assignedTo": "Emma Wilson"
   },
@@ -45,7 +45,7 @@
     "model": "Hyundai Tucson 2.0",
     "year": 2022,
     "status": "Maintenance",
-    "lastServiceDate": "2025-10-10",
+    "lastServiceDate": "2026-10-10",
     "location": "Livingstone",
     "assignedTo": "Unassigned"
   },
@@ -55,7 +55,7 @@
     "model": "Toyota Yaris 1.5",
     "year": 2021,
     "status": "Maintenance",
-    "lastServiceDate": "2025-07-15",
+    "lastServiceDate": "2026-07-15",
     "location": "Lusaka",
     "assignedTo": "Unassigned"
   },
@@ -65,7 +65,7 @@
     "model": "Nissan NV200 1.6",
     "year": 2023,
     "status": "Available",
-    "lastServiceDate": "2025-10-08",
+    "lastServiceDate": "2026-10-08",
     "location": "Ndola",
     "assignedTo": "Robert Brown"
   },
@@ -75,7 +75,7 @@
     "model": "Hyundai Elantra 1.6",
     "year": 2023,
     "status": "Available",
-    "lastServiceDate": "2025-09-25",
+    "lastServiceDate": "2026-09-25",
     "location": "Kitwe",
     "assignedTo": "Lisa Anderson"
   }

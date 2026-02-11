@@ -47,7 +47,7 @@ const Help = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+              className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-shadow"
             >
               <div className="flex items-center gap-3 mb-4">
                 <Icon size={24} className="text-red-600" />
@@ -102,7 +102,7 @@ const Help = () => {
               Ancestro specializes in building robust and scalable software solutions for enterprise management.
             </p>
             <div className="text-xs text-gray-500 mt-4">
-              <p>© 2025 Ancestro. All rights reserved.</p>
+              <p>© 2026 Ancestro. All rights reserved.</p>
               <p className="mt-1">
                 Unauthorized duplication or distribution of this software is strictly prohibited.
               </p>
@@ -128,7 +128,7 @@ const Help = () => {
               <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <FaEnvelope className="text-red-600" /> Direct Contact
               </h3>
-              <a href="mailto:hello@ancestroai.co.zm" className="text-gray-600 hover:text-red-600 transition-colors">
+              <a href="mailto:hello@ancestroai.co.zm" className="text-gray-600 transition-colors">
                 hello@ancestroai.co.zm
               </a>
            </div>
@@ -137,16 +137,16 @@ const Help = () => {
            <div>
               <h3 className="font-semibold text-gray-800 mb-4">Follow Us</h3>
               <div className="space-y-3">
-                <a href="https://linkedin.com/company/ancestroai" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-600 hover:text-[#0077b5] transition-colors">
+                <a href="https://linkedin.com/company/ancestroai" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-600 transition-colors">
                   <FaLinkedin size={20} /> <span>@ancestroai</span>
                 </a>
-                <a href="https://twitter.com/AncestroAi" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-600 hover:text-black transition-colors">
+                <a href="https://twitter.com/AncestroAi" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-600 transition-colors">
                   <FaTwitter size={20} /> <span>@AncestroAi</span>
                 </a>
-                <a href="https://instagram.com/ancestroai" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-600 hover:text-[#E1306C] transition-colors">
+                <a href="https://instagram.com/ancestroai" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-600 transition-colors">
                   <FaInstagram size={20} /> <span>@ancestroai</span>
                 </a>
-                <a href="https://facebook.com/Ancestro" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-600 hover:text-[#1877F2] transition-colors">
+                <a href="https://www.facebook.com/profile.php?id=61558529813462" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-600 transition-colors">
                   <FaFacebook size={20} /> <span>Ancestro</span>
                 </a>
               </div>

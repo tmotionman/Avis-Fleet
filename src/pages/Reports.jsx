@@ -160,31 +160,31 @@ const Reports = ({ vehicles, clients = [], assignments = [] }) => {
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h3 className="text-lg font-semibold text-avis-black mb-4">Fleet Report Summary</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Total Vehicles</p>
-              <p className="text-3xl font-bold text-white mt-1">{vehiclesData.length}</p>
+              <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Vehicles</p>
+              <p className="text-3xl font-bold text-avis-black mt-1">{vehiclesData.length}</p>
             </div>
             <div className="w-3 h-3 rounded-full bg-avis-red"></div>
           </div>
-          <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Available Vehicles</p>
-              <p className="text-3xl font-bold text-white mt-1">{vehiclesData.filter(v => v.status === 'Available').length}</p>
+              <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Available Vehicles</p>
+              <p className="text-3xl font-bold text-avis-black mt-1">{vehiclesData.filter(v => v.status === 'Available').length}</p>
             </div>
             <div className="w-3 h-3 rounded-full bg-avis-red"></div>
           </div>
-          <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">On Rent</p>
-              <p className="text-3xl font-bold text-white mt-1">{vehiclesData.filter(v => v.status === 'On Rent').length}</p>
+              <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">On Rent</p>
+              <p className="text-3xl font-bold text-avis-black mt-1">{vehiclesData.filter(v => v.status === 'On Rent').length}</p>
             </div>
             <div className="w-3 h-3 rounded-full bg-avis-red"></div>
           </div>
-          <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Fleet Age (Avg)</p>
-              <p className="text-3xl font-bold text-white mt-1">{vehiclesData.length > 0 ? Math.round(vehiclesData.reduce((sum, v) => sum + (2025 - v.year), 0) / vehiclesData.length) : 0} <span className="text-xs">years</span></p>
+              <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Fleet Age (Avg)</p>
+              <p className="text-3xl font-bold text-avis-black mt-1">{vehiclesData.length > 0 ? Math.round(vehiclesData.reduce((sum, v) => sum + (2026 - v.year), 0) / vehiclesData.length) : 0} <span className="text-xs">years</span></p>
             </div>
             <div className="w-3 h-3 rounded-full bg-avis-red"></div>
           </div>
@@ -223,16 +223,14 @@ const Reports = ({ vehicles, clients = [], assignments = [] }) => {
 
       <div className="flex gap-3">
         <motion.button
-          whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => exportToCSV(vehiclesData, 'fleet-report.csv')}
-          className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-gray-600 bg-white border border-gray-200 rounded-full transition-all shadow-sm"
         >
           <Download size={14} />
           Export CSV
         </motion.button>
         <motion.button
-          whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => exportToPDF('Fleet Report', vehiclesData, [
             { key: 'registrationNo', label: 'Registration' },
@@ -241,7 +239,7 @@ const Reports = ({ vehicles, clients = [], assignments = [] }) => {
             { key: 'status', label: 'Status' },
             { key: 'location', label: 'Location' },
           ])}
-          className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-gray-600 bg-white border border-gray-200 rounded-full transition-all shadow-sm"
         >
           <FileText size={14} />
           Export PDF
@@ -259,24 +257,24 @@ const Reports = ({ vehicles, clients = [], assignments = [] }) => {
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h3 className="text-lg font-semibold text-avis-black mb-4">Clients Report</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Total Clients</p>
-              <p className="text-3xl font-bold text-white mt-1">{clientsData.length}</p>
+              <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Clients</p>
+              <p className="text-3xl font-bold text-avis-black mt-1">{clientsData.length}</p>
             </div>
             <div className="w-3 h-3 rounded-full bg-avis-red"></div>
           </div>
-          <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Active Clients</p>
-              <p className="text-3xl font-bold text-white mt-1">{clientsData.filter(c => c.status === 'Active').length}</p>
+              <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Active Clients</p>
+              <p className="text-3xl font-bold text-avis-black mt-1">{clientsData.filter(c => c.status === 'Active').length}</p>
             </div>
             <div className="w-3 h-3 rounded-full bg-avis-red"></div>
           </div>
-          <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Industries</p>
-              <p className="text-3xl font-bold text-white mt-1">{new Set(clientsData.map(c => c.industry)).size}</p>
+              <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Industries</p>
+              <p className="text-3xl font-bold text-avis-black mt-1">{new Set(clientsData.map(c => c.industry)).size}</p>
             </div>
             <div className="w-3 h-3 rounded-full bg-avis-red"></div>
           </div>
@@ -315,16 +313,14 @@ const Reports = ({ vehicles, clients = [], assignments = [] }) => {
 
       <div className="flex gap-3">
         <motion.button
-          whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => exportToCSV(clientsData, 'clients-report.csv')}
-          className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-gray-600 bg-white border border-gray-200 rounded-full transition-all shadow-sm"
         >
           <Download size={14} />
           Export CSV
         </motion.button>
         <motion.button
-          whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => exportToPDF('Clients Report', clientsData, [
             { key: 'name', label: 'Name' },
@@ -334,7 +330,7 @@ const Reports = ({ vehicles, clients = [], assignments = [] }) => {
             { key: 'city', label: 'City' },
             { key: 'status', label: 'Status' },
           ])}
-          className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-gray-600 bg-white border border-gray-200 rounded-full transition-all shadow-sm"
         >
           <FileText size={14} />
           Export PDF
@@ -357,31 +353,31 @@ const Reports = ({ vehicles, clients = [], assignments = [] }) => {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h3 className="text-lg font-semibold text-avis-black mb-4">Fleet Assignment Summary</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+            <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Total Assignments</p>
-                <p className="text-3xl font-bold text-white mt-1">{assignmentsData.length}</p>
+                <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Assignments</p>
+                <p className="text-3xl font-bold text-avis-black mt-1">{assignmentsData.length}</p>
               </div>
               <div className="w-3 h-3 rounded-full bg-avis-red"></div>
             </div>
-            <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+            <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Active Assignments</p>
-                <p className="text-3xl font-bold text-white mt-1">{activeAssignments.length}</p>
+                <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Active Assignments</p>
+                <p className="text-3xl font-bold text-avis-black mt-1">{activeAssignments.length}</p>
               </div>
               <div className="w-3 h-3 rounded-full bg-avis-red"></div>
             </div>
-            <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+            <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Completed</p>
-                <p className="text-3xl font-bold text-white mt-1">{completedAssignments.length}</p>
+                <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Completed</p>
+                <p className="text-3xl font-bold text-avis-black mt-1">{completedAssignments.length}</p>
               </div>
               <div className="w-3 h-3 rounded-full bg-avis-red"></div>
             </div>
-            <div className="bg-avis-darkgray rounded-xl p-4 flex items-center justify-between">
+            <div className="bg-transparent rounded-xl border border-gray-300 p-4 flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">Completion Rate</p>
-                <p className="text-3xl font-bold text-white mt-1">{assignmentsData.length > 0 ? Math.round((completedAssignments.length / assignmentsData.length) * 100) : 0}%</p>
+                <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Completion Rate</p>
+                <p className="text-3xl font-bold text-avis-black mt-1">{assignmentsData.length > 0 ? Math.round((completedAssignments.length / assignmentsData.length) * 100) : 0}%</p>
               </div>
               <div className="w-3 h-3 rounded-full bg-avis-red"></div>
             </div>
@@ -470,7 +466,6 @@ const Reports = ({ vehicles, clients = [], assignments = [] }) => {
         {assignmentsData.length > 0 && (
           <div className="flex gap-3">
             <motion.button
-              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
                 const exportData = assignmentsData.map(a => {
@@ -488,13 +483,12 @@ const Reports = ({ vehicles, clients = [], assignments = [] }) => {
                 })
                 exportToCSV(exportData, 'fleet-assignments-report.csv')
               }}
-              className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-gray-600 bg-white border border-gray-200 rounded-full transition-all shadow-sm"
             >
               <Download size={14} />
               Export CSV
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
                 const activeData = activeAssignments.map(a => {
@@ -553,7 +547,7 @@ const Reports = ({ vehicles, clients = [], assignments = [] }) => {
 
                 exportToPDF('Fleet Assignments Report', sections)
               }}
-              className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-gray-600 bg-white border border-gray-200 rounded-full transition-all shadow-sm"
             >
               <FileText size={14} />
               Export PDF
@@ -586,12 +580,11 @@ const Reports = ({ vehicles, clients = [], assignments = [] }) => {
           <motion.button
             key={report.id}
             onClick={() => setSelectedReport(report.id)}
-            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`px-6 py-3 font-medium text-sm transition-all duration-200 border-b-2 ${
               selectedReport === report.id
                 ? 'text-avis-red border-avis-red'
-                : 'text-gray-600 border-transparent hover:text-gray-900'
+                : 'text-gray-600 border-transparent'
             }`}
           >
             {report.label}

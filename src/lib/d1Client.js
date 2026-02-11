@@ -6,7 +6,7 @@
 // API Base URL - Update this after deploying your worker
 // For local development, use the dev environment with open CORS
 const isDevelopment = import.meta.env.DEV;
-const API_BASE_URL = isDevelopment 
+export const API_BASE_URL = isDevelopment 
   ? 'https://avis-fleet-api.twizasimwanza.workers.dev'  // Still use production for localhost
   : (import.meta.env.VITE_API_URL || 'https://avis-fleet-api.twizasimwanza.workers.dev');
 
@@ -14,13 +14,14 @@ const API_BASE_URL = isDevelopment
 async function apiFetch(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
   
-  const defaultOptions = {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  };
-  
-  const response = await fetch(url, { ...defaultOptions, ...options });
+  const defaultHeaders = options.body instanceof FormData 
+    ? {} 
+    : { 'Content-Type': 'application/json' };
+
+  const response = await fetch(url, { 
+    ...options, 
+    headers: { ...defaultHeaders, ...options.headers } 
+  });
   
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
@@ -144,16 +145,37 @@ export const usersApi = {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
+  uploadProfilePicture: (file, userId) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('userId', userId);
+    return apiFetch('/api/upload/profile', {
+      method: 'POST',
+      body: formData,
+      // Note: apiFetch should handle NOT setting Content-Type for FormData
+    });
+  },
 };
 
 // ============== DASHBOARD ==============
 export const dashboardApi = {
-  getStats: () => apiFetch('/api/stats'),
+  getStats: (userId) => userId 
+    ? apiFetch(`/api/stats?userId=${userId}`)
+    : apiFetch('/api/stats'),
 };
 
 // ============== EXCHANGE RATES ==============
 export const exchangeRatesApi = {
   getRates: () => apiFetch('/api/exchange-rates'),
+};
+
+// ============== NOTIFICATIONS ==============
+export const notificationsApi = {
+  getStates: (userId) => apiFetch(`/api/notifications?userId=${userId}`),
+  updateState: (userId, notificationId, isRead, isDismissed) => apiFetch('/api/notifications', {
+    method: 'POST',
+    body: JSON.stringify({ userId, notificationId, isRead, isDismissed }),
+  }),
 };
 
 // ============== HEALTH CHECK ==============
@@ -168,5 +190,6 @@ export default {
   users: usersApi,
   dashboard: dashboardApi,
   exchangeRates: exchangeRatesApi,
+  notifications: notificationsApi,
   healthCheck,
 };

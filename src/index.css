@@ -30,10 +30,6 @@ body {
   border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #C41620;
-}
-
 /* Thin scrollbar for widgets */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
@@ -48,26 +44,22 @@ body {
   border-radius: 2px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #D1D5DB;
-}
-
 /* Smooth transitions */
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 bg-avis-red text-white rounded-2xl font-medium transition-all duration-200 ease-in-out hover:bg-opacity-90 hover:shadow-lg active:scale-95;
+    @apply px-4 py-2 bg-avis-red text-white rounded-2xl font-medium transition-all duration-200 ease-in-out active:scale-95;
   }
 
   .btn-secondary {
-    @apply px-4 py-2 bg-white text-avis-red border-2 border-avis-red rounded-2xl font-medium transition-all duration-200 ease-in-out hover:bg-avis-red hover:text-white;
+    @apply px-4 py-2 bg-white text-avis-red border-2 border-avis-red rounded-2xl font-medium transition-all duration-200 ease-in-out;
   }
 
   .btn-ghost {
-    @apply px-4 py-2 text-avis-darkgray rounded-2xl font-medium transition-all duration-200 ease-in-out hover:bg-gray-100;
+    @apply px-4 py-2 text-avis-darkgray rounded-2xl font-medium transition-all duration-200 ease-in-out;
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-100 transition-all duration-200 ease-in-out hover:shadow-md;
+    @apply bg-white rounded-xl border border-gray-200 transition-all duration-200 ease-in-out;
   }
 
   .badge {
@@ -150,11 +142,6 @@ body {
   transition: all 0.2s ease;
 }
 
-.react-datepicker__day:hover {
-  background-color: #F3F4F6 !important;
-  color: #111827 !important;
-}
-
 /* Selected date styling - RED */
 .react-datepicker__day--selected,
 .react-datepicker__day--in-selecting-range,
@@ -163,10 +150,6 @@ body {
   color: #fff !important;
   font-weight: 600 !important;
   box-shadow: 0 4px 6px -1px rgba(228, 30, 38, 0.3);
-}
-
-.react-datepicker__day--selected:hover {
-  background-color: #C41620 !important;
 }
 
 /* Today indicator */
@@ -223,10 +206,9 @@ body {
   width: 8px !important;
 }
 
-.react-datepicker__navigation--previous:hover,
-.react-datepicker__navigation--next:hover {
-  background-color: #f3f4f6;
-  border-radius: 50%;
+.react-datepicker__navigation--previous,
+.react-datepicker__navigation--next {
+  background-color: transparent;
 }
 
 .react-datepicker__day--disabled {
@@ -258,12 +240,6 @@ body {
   transition: all 0.2s ease;
 }
 
-.react-datepicker__month-read-view:hover,
-.react-datepicker__year-read-view:hover {
-  background-color: #f3f4f6;
-  border-color: #d1d5db;
-}
-
 .react-datepicker__month-dropdown,
 .react-datepicker__year-dropdown {
   background-color: #fff;
@@ -288,21 +264,11 @@ body {
   border-radius: 6px;
 }
 
-.react-datepicker__month-option:hover,
-.react-datepicker__year-option:hover {
-  background-color: #f3f4f6;
-}
-
 .react-datepicker__month-option--selected,
 .react-datepicker__year-option--selected {
   background-color: #FEF2F2;
   color: #E41E26;
   font-weight: 600;
-}
-
-.react-datepicker__month-option--selected:hover,
-.react-datepicker__year-option--selected:hover {
-  background-color: #FEE2E2;
 }
 
 
